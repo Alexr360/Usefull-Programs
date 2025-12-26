@@ -56,6 +56,69 @@
             -webkit-appearance: none; 
             margin: 0; 
         }
+        .dynamic-ing {
+            font-weight: 600;
+            color: #f06543;
+            background-color: rgba(240, 101, 67, 0.1);
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+        .dark .dynamic-ing {
+            color: #f88f70;
+            background-color: rgba(248, 143, 112, 0.15);
+        }
+        /* Timer Styles */
+        .timer-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.15rem 0.6rem;
+            background-color: #fee2e2;
+            color: #c53030;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(254, 226, 226, 0.5);
+            vertical-align: middle;
+            margin: 0 4px;
+        }
+        .dark .timer-btn {
+            background-color: #7f1d1d;
+            color: #fca5a5;
+            border-color: #991b1b;
+        }
+        .timer-btn:hover {
+            transform: scale(1.05);
+        }
+        .timer-btn.running {
+            background-color: #fef3c7;
+            color: #d97706;
+            border-color: #fcd34d;
+        }
+        .dark .timer-btn.running {
+            background-color: #78350f;
+            color: #fcd34d;
+            border-color: #b45309;
+        }
+        .timer-btn.finished {
+            background-color: #d1fae5;
+            color: #059669;
+            border-color: #6ee7b7;
+            animation: pulse-green 1s infinite; /* Faster pulse when ringing */
+        }
+        .dark .timer-btn.finished {
+            background-color: #064e3b;
+            color: #6ee7b7;
+            border-color: #059669;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); transform: scale(1); }
+        }
     </style>
 </head>
 <body class="text-gray-800 dark:text-gray-200 bg-chef-50 dark:bg-dark-950 min-h-screen flex flex-col transition-colors duration-300">
@@ -74,7 +137,6 @@
                         <i class="fa-solid fa-moon block dark:hidden"></i>
                         <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
                     </button>
-
                     <button onclick="app.exportRecipes()" class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-chef-600 dark:hover:text-chef-400 transition-colors">
                         <i class="fa-solid fa-download"></i> Export
                     </button>
@@ -92,30 +154,35 @@
 
     <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
         
+        <!-- HOME VIEW -->
         <div id="view-home" class="animate-fade-in">
-            <div class="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                <div class="relative w-full sm:max-w-md">
-                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="searchInput" placeholder="Search recipes, ingredients..." 
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:border-chef-500 focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none shadow-sm transition-all"
-                           onkeyup="app.renderRecipeList()">
-                </div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">
-                    <span id="recipeCount">0</span> Recipes stored
-                </div>
-                <div class="flex sm:hidden w-full gap-2">
-                     <button onclick="app.exportRecipes()" class="flex-1 items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300">
-                        <i class="fa-solid fa-download"></i> Export
-                    </button>
-                    <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300">
-                        <i class="fa-solid fa-upload"></i> Import
-                        <input type="file" accept=".json" class="hidden" onchange="app.importRecipes(this)">
-                    </label>
+            <div class="mb-8 flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:max-w-2xl">
+                        <div class="relative flex-grow">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="searchInput" placeholder="Search recipes, ingredients..." 
+                                   class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:border-chef-500 focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none shadow-sm transition-all"
+                                   onkeyup="app.renderRecipeList()">
+                        </div>
+                        <select id="categoryFilter" onchange="app.renderRecipeList()" class="w-full sm:w-48 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:border-chef-500 focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none shadow-sm cursor-pointer appearance-none">
+                            <option value="">All Categories</option>
+                            <option value="Appetizers">Appetizers</option>
+                            <option value="Beverages">Beverages</option>
+                            <option value="Breads">Breads</option>
+                            <option value="Desserts">Desserts</option>
+                            <option value="Main Course">Main Course</option>
+                            <option value="Salads">Salads</option>
+                        </select>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        <span id="recipeCount">0</span> Recipes
+                    </div>
                 </div>
             </div>
 
             <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
-                <div class="bg-orange-100 dark:bg-gray-800 p-6 rounded-full mb-4 transition-colors">
+                <div class="bg-orange-100 dark:bg-gray-800 p-6 rounded-full mb-4">
                     <i class="fa-solid fa-book-open text-4xl text-chef-400"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">No recipes yet</h3>
@@ -123,12 +190,12 @@
                 <button onclick="app.openEditor()" class="text-chef-600 dark:text-chef-400 font-semibold hover:underline">Create your first recipe &rarr;</button>
             </div>
 
-            <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
+            <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
+        <!-- EDITOR VIEW -->
         <div id="view-editor" class="hidden max-w-4xl mx-auto">
-            <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors">
+            <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                 <div class="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-white" id="editorTitle">New Recipe</h2>
                     <button onclick="app.showHome()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -140,20 +207,38 @@
                     <input type="hidden" id="editId">
                     
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recipe Name</label>
-                            <input type="text" id="recipeName" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="e.g., Mom's Lasagna">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recipe Name</label>
+                                <input type="text" id="recipeName" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="e.g., Mom's Lasagna">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source / Author</label>
+                                <input type="text" id="recipeSource" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="e.g., Grandma, NYT Cooking">
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                            <textarea id="recipeDesc" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="A short description of the dish..."></textarea>
+                            <textarea id="recipeDesc" rows="2" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="A short description of the dish..."></textarea>
                         </div>
-                        <div class="flex gap-4">
-                            <div class="w-1/2">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                <select id="recipeCategory" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none appearance-none">
+                                    <option value="">Uncategorized</option>
+                                    <option value="Appetizers">Appetizers</option>
+                                    <option value="Beverages">Beverages</option>
+                                    <option value="Breads">Breads</option>
+                                    <option value="Desserts">Desserts</option>
+                                    <option value="Main Course">Main Course</option>
+                                    <option value="Salads">Salads</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-regular fa-clock mr-1"></i> Prep Time</label>
                                 <input type="text" id="recipePrep" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 30 mins">
                             </div>
-                            <div class="w-1/2">
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-solid fa-users mr-1"></i> Base Servings</label>
                                 <input type="number" id="recipeServings" required min="1" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 4">
                             </div>
@@ -161,73 +246,63 @@
                     </div>
 
                     <div class="grid grid-cols-1 gap-8 mt-6">
-                        <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl transition-colors">
+                        <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-serif font-bold text-lg text-gray-800 dark:text-white">Ingredients</h3>
                                 <button type="button" onclick="app.addIngredientField()" class="text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-200 hover:border-chef-500 hover:text-chef-600 px-2 py-1 rounded shadow-sm transition-colors">
                                     <i class="fa-solid fa-plus mr-1"></i> Add Item
                                 </button>
                             </div>
-                            <div class="grid grid-cols-10 gap-2 mb-2 px-1">
-                                <span class="col-span-2 text-xs font-bold text-gray-500 uppercase">Amount</span>
-                                <span class="col-span-2 text-xs font-bold text-gray-500 uppercase">Unit</span>
-                                <span class="col-span-5 text-xs font-bold text-gray-500 uppercase">Ingredient</span>
-                                <span class="col-span-1"></span>
-                            </div>
-                            <div id="ingredientsList" class="space-y-2">
-                                </div>
+                            <div id="ingredientsList" class="space-y-2"></div>
                         </div>
 
-                        <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl transition-colors">
-                            <div class="flex justify-between items-center mb-4">
+                        <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl">
+                            <div class="flex justify-between items-center mb-2">
                                 <h3 class="font-serif font-bold text-lg text-gray-800 dark:text-white">Instructions</h3>
                                 <button type="button" onclick="app.addStepField()" class="text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-200 hover:border-chef-500 hover:text-chef-600 px-2 py-1 rounded shadow-sm transition-colors">
                                     <i class="fa-solid fa-plus mr-1"></i> Add Step
                                 </button>
                             </div>
-                            <div id="stepsList" class="space-y-2">
-                                </div>
+                            <div id="ingredientToolbar" class="flex flex-wrap gap-2 mb-3 min-h-[28px]"></div>
+                            <div id="stepsList" class="space-y-2"></div>
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <button type="button" onclick="app.showHome()" class="px-6 py-2 rounded-lg text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancel</button>
-                        <button type="submit" class="px-6 py-2 rounded-lg bg-chef-500 text-white font-medium hover:bg-chef-600 shadow-md transition-all transform hover:-translate-y-0.5">Save Recipe</button>
+                        <button type="button" onclick="app.showHome()" class="px-6 py-2 rounded-lg text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-gray-800">Cancel</button>
+                        <button type="submit" class="px-6 py-2 rounded-lg bg-chef-500 text-white font-medium hover:bg-chef-600 shadow-md transform transition-all hover:-translate-y-0.5">Save Recipe</button>
                     </div>
                 </form>
             </div>
         </div>
 
+        <!-- DETAIL VIEW -->
         <div id="view-detail" class="hidden animate-fade-in max-w-4xl mx-auto">
             <button onclick="app.showHome()" class="mb-6 flex items-center text-gray-500 dark:text-gray-400 hover:text-chef-600 dark:hover:text-chef-400 transition-colors">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Back to Cookbook
             </button>
             
-            <div id="recipe-content-to-print" class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden relative transition-colors">
+            <div id="recipe-content-to-print" class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden relative">
                 <div class="h-32 bg-gradient-to-r from-chef-400 to-chef-600 relative overflow-hidden">
                     <div class="absolute inset-0 opacity-20 pattern-dots"></div>
-                    <div class="absolute -bottom-10 -right-10 text-white opacity-20">
-                        <i class="fa-solid fa-utensils text-9xl"></i>
-                    </div>
                 </div>
                 
                 <div class="px-8 pb-8 -mt-12 relative">
-                    <div class="bg-white dark:bg-dark-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors">
+                    <div class="bg-white dark:bg-dark-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div>
-                                <h1 id="detailName" class="font-serif text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2"></h1>
+                            <div class="flex-grow">
+                                <div class="flex flex-col md:flex-row md:items-center gap-2 mb-1">
+                                    <h1 id="detailName" class="font-serif text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"></h1>
+                                    <span id="detailCategoryBadge" class="hidden text-xs font-semibold bg-chef-100 dark:bg-chef-900 text-chef-600 dark:text-chef-400 px-2 py-1 rounded-md uppercase tracking-wider self-start md:self-center"></span>
+                                </div>
+                                <p id="detailSource" class="text-chef-600 dark:text-chef-400 font-medium text-sm mb-3 italic"></p>
                                 <p id="detailDesc" class="text-gray-600 dark:text-gray-300 leading-relaxed"></p>
                             </div>
                             <div id="detailActions" class="flex gap-2 self-end md:self-start">
-                                <button onclick="app.exportToPDF()" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Export as PDF">
-                                    <i class="fa-solid fa-file-pdf"></i>
-                                </button>
-                                <button id="btnEdit" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Edit Recipe">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button id="btnDelete" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Delete Recipe">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                                <button onclick="app.exportToPDF()" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Export PDF"><i class="fa-solid fa-file-pdf"></i></button>
+                                <button id="btnDuplicate" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Duplicate Recipe"><i class="fa-solid fa-copy"></i></button>
+                                <button id="btnEdit" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Edit Recipe"><i class="fa-solid fa-pen"></i></button>
+                                <button id="btnDelete" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Delete Recipe"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
 
@@ -237,17 +312,23 @@
                                 <span id="detailPrep"></span>
                             </span>
                             
-                            <div class="flex items-center gap-3 bg-orange-50 dark:bg-gray-700/50 px-3 py-1 rounded-lg">
-                                <span class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-solid fa-users text-chef-500 mr-1"></i> Servings:</span>
-                                <div class="flex items-center">
-                                    <button onclick="app.adjustServings(-1)" class="w-6 h-6 rounded bg-white dark:bg-gray-600 hover:bg-chef-100 dark:hover:bg-gray-500 text-chef-600 dark:text-chef-400 flex items-center justify-center transition-colors shadow-sm">
-                                        <i class="fa-solid fa-minus text-xs"></i>
-                                    </button>
-                                    <input type="number" id="detailServingsInput" value="4" readonly class="w-10 text-center bg-transparent font-bold text-gray-800 dark:text-white outline-none">
-                                    <button onclick="app.adjustServings(1)" class="w-6 h-6 rounded bg-white dark:bg-gray-600 hover:bg-chef-100 dark:hover:bg-gray-500 text-chef-600 dark:text-chef-400 flex items-center justify-center transition-colors shadow-sm">
-                                        <i class="fa-solid fa-plus text-xs"></i>
-                                    </button>
+                            <div class="flex items-center">
+                                <div class="flex items-center gap-3 bg-orange-50 dark:bg-gray-700/50 px-3 py-1 rounded-lg">
+                                    <span class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-solid fa-users text-chef-500 mr-1"></i> Servings:</span>
+                                    <div class="flex items-center">
+                                        <button onclick="app.adjustServings(-1)" class="w-6 h-6 rounded bg-white dark:bg-gray-600 hover:bg-chef-100 dark:hover:bg-gray-500 text-chef-600 dark:text-chef-400 flex items-center justify-center transition-colors shadow-sm">
+                                            <i class="fa-solid fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="detailServingsInput" value="4" readonly class="w-10 text-center bg-transparent font-bold text-gray-800 dark:text-white outline-none">
+                                        <button onclick="app.adjustServings(1)" class="w-6 h-6 rounded bg-white dark:bg-gray-600 hover:bg-chef-100 dark:hover:bg-gray-500 text-chef-600 dark:text-chef-400 flex items-center justify-center transition-colors shadow-sm">
+                                            <i class="fa-solid fa-plus text-xs"></i>
+                                        </button>
+                                    </div>
                                 </div>
+                                
+                                <button onclick="app.toggleFractions()" id="btnFractions" class="ml-3 w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-chef-600 hover:border-chef-500 hover:bg-orange-50 dark:hover:bg-gray-800 transition-all font-serif font-bold text-sm" title="Toggle Fractions">
+                                    ½
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -255,13 +336,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="md:col-span-1">
                             <h3 class="font-serif text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-orange-100 dark:border-gray-700">Ingredients</h3>
-                            <div id="detailIngredients" class="space-y-3">
-                                </div>
+                            <div id="detailIngredients" class="space-y-3"></div>
                         </div>
                         <div class="md:col-span-2">
                             <h3 class="font-serif text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-orange-100 dark:border-gray-700">Instructions</h3>
-                            <div id="detailSteps" class="space-y-4">
-                                </div>
+                            <div id="detailSteps" class="space-y-4"></div>
                         </div>
                     </div>
                 </div>
@@ -276,67 +355,57 @@
     </div>
 
     <script>
-        // Unit Conversion Configuration
         const UNIT_DATA = {
-            vol_imp: {
-                base: 'tsp',
+            vol_imp: { 
+                base: 'tsp', 
                 units: [
-                    { name: 'gal', val: 768 },
-                    { name: 'qt', val: 192 },
-                    { name: 'pt', val: 96 },
-                    { name: 'cup', val: 48 },
-                    { name: 'fl oz', val: 6 },
-                    { name: 'tbsp', val: 3 },
-                    { name: 'tsp', val: 1 }
-                ]
+                    { name: 'gal', val: 768 }, 
+                    { name: 'qt', val: 192 }, 
+                    { name: 'pt', val: 96 }, 
+                    { name: 'cup', val: 48 }, 
+                    { name: 'fl oz', val: 6 }, 
+                    { name: 'tbsp', val: 3 }, 
+                    { name: 'tsp', val: 1 },
+                    { name: 'dash', val: 0.125 },
+                    { name: 'pinch', val: 0.0625 }
+                ] 
             },
-            vol_metric: {
-                base: 'ml',
-                units: [
-                    { name: 'l', val: 1000 },
-                    { name: 'ml', val: 1 }
-                ]
-            },
-            wgt_imp: {
-                base: 'oz',
-                units: [
-                    { name: 'lb', val: 16 },
-                    { name: 'oz', val: 1 }
-                ]
-            },
-            wgt_metric: {
-                base: 'g',
-                units: [
-                    { name: 'kg', val: 1000 },
-                    { name: 'g', val: 1 }
-                ]
-            }
+            vol_metric: { base: 'ml', units: [{ name: 'l', val: 1000 }, { name: 'ml', val: 1 }] },
+            wgt_imp: { base: 'oz', units: [{ name: 'lb', val: 16 }, { name: 'oz', val: 1 }] },
+            wgt_metric: { base: 'g', units: [{ name: 'kg', val: 1000 }, { name: 'g', val: 1 }] }
         };
 
         const STANDARD_UNITS = [
-            'tsp', 'tbsp', 'fl oz', 'cup', 'pt', 'qt', 'gal',
-            'ml', 'l',
-            'oz', 'lb',
-            'g', 'kg',
-            'can', 'pinch', 'clove', 'slice', 'pkg'
+            'tsp', 'tbsp', 'fl oz', 'cup', 'pt', 'qt', 'gal', 
+            'ml', 'l', 
+            'oz', 'lb', 
+            'g', 'kg', 
+            'dash', 'pinch', 'scoop', 'stick', 'can', 'clove', 'slice', 'pkg'
         ];
 
         const app = {
             recipes: [],
             currentRecipe: null, 
-            currentServings: 1, 
+            currentServings: 1,
+            lastFocusedStep: null,
+            useFractions: false,
+            timers: {},
 
             init() {
                 this.initTheme();
                 const stored = localStorage.getItem('cookbook_recipes');
                 if (stored) {
-                    try {
-                        this.recipes = JSON.parse(stored);
-                    } catch (e) {
-                        this.recipes = [];
-                    }
+                    try { this.recipes = JSON.parse(stored); } catch (e) { this.recipes = []; }
                 }
                 this.renderRecipeList();
+                document.addEventListener('focusin', (e) => {
+                    if (e.target && e.target.classList.contains('step-input')) this.lastFocusedStep = e.target;
+                });
+                
+                // Request notification permission
+                if ('Notification' in window && Notification.permission !== 'granted') {
+                    Notification.requestPermission();
+                }
             },
 
             initTheme() {
@@ -363,11 +432,11 @@
                 this.renderRecipeList();
             },
 
-            // Navigation
             showHome() {
                 document.getElementById('view-home').classList.remove('hidden');
                 document.getElementById('view-editor').classList.add('hidden');
                 document.getElementById('view-detail').classList.add('hidden');
+                this.stopAllTimers();
                 window.scrollTo(0,0);
             },
 
@@ -389,28 +458,27 @@
                     title.textContent = 'Edit Recipe';
                     document.getElementById('editId').value = recipe.id;
                     document.getElementById('recipeName').value = recipe.name;
+                    document.getElementById('recipeSource').value = recipe.source || '';
                     document.getElementById('recipeDesc').value = recipe.description || '';
+                    document.getElementById('recipeCategory').value = recipe.category || '';
                     document.getElementById('recipePrep').value = recipe.prepTime || '';
                     document.getElementById('recipeServings').value = recipe.servings || 1;
 
-                    // Handle Backward Compatibility for Ingredients
                     recipe.ingredients.forEach(ing => {
-                        if (typeof ing === 'string') {
-                            this.addIngredientField('', '', ing);
-                        } else {
-                            this.addIngredientField(ing.qty, ing.unit, ing.name);
-                        }
+                        this.addIngredientField(ing.qty, ing.unit, ing.name);
                     });
-                    
                     recipe.steps.forEach(step => this.addStepField(step));
                 } else {
                     title.textContent = 'New Recipe';
                     form.reset();
                     document.getElementById('editId').value = '';
-                    document.getElementById('recipeServings').value = 4; // Default
+                    document.getElementById('recipeServings').value = 4;
+                    document.getElementById('recipeCategory').value = '';
                     this.addIngredientField();
                     this.addStepField();
                 }
+                
+                this.updateIngredientToolbar();
                 window.scrollTo(0,0);
             },
 
@@ -426,67 +494,284 @@
                 document.getElementById('view-detail').classList.remove('hidden');
 
                 document.getElementById('detailName').textContent = recipe.name;
+                
+                const catBadge = document.getElementById('detailCategoryBadge');
+                if (recipe.category) {
+                    catBadge.textContent = recipe.category;
+                    catBadge.classList.remove('hidden');
+                } else {
+                    catBadge.classList.add('hidden');
+                }
+
+                const sourceEl = document.getElementById('detailSource');
+                if (recipe.source) {
+                    sourceEl.textContent = `Source: ${recipe.source}`;
+                    sourceEl.classList.remove('hidden');
+                } else {
+                    sourceEl.classList.add('hidden');
+                }
+
                 document.getElementById('detailDesc').textContent = recipe.description || 'No description provided.';
                 document.getElementById('detailPrep').textContent = recipe.prepTime || '--';
-                
-                // Set initial servings input
                 document.getElementById('detailServingsInput').value = this.currentServings;
 
-                // Setup Actions
+                document.getElementById('btnDuplicate').onclick = () => this.duplicateRecipe(recipe.id);
                 document.getElementById('btnEdit').onclick = () => this.openEditor(recipe.id);
                 document.getElementById('btnDelete').onclick = () => {
-                    if(confirm(`Delete "${recipe.name}"?`)) {
-                        this.deleteRecipe(recipe.id);
-                    }
+                    if(confirm(`Delete "${recipe.name}"?`)) this.deleteRecipe(recipe.id);
                 };
 
-                // Render Instructions with "Done" functionality
-                const stepList = document.getElementById('detailSteps');
-                stepList.innerHTML = recipe.steps.map((step, index) => `
-                    <label class="flex gap-4 group cursor-pointer select-none">
-                        <input type="checkbox" class="peer sr-only">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-chef-100 dark:bg-chef-900 text-chef-600 dark:text-chef-400 font-bold flex items-center justify-center text-sm transition-all peer-checked:bg-green-500 peer-checked:text-white">
-                            <span class="group-hover:hidden peer-checked:hidden">${index + 1}</span>
-                            <i class="fa-solid fa-check hidden group-hover:block peer-checked:block"></i>
-                        </div>
-                        <p class="text-gray-700 dark:text-gray-300 mt-1 leading-relaxed peer-checked:text-gray-400 peer-checked:line-through transition-colors">
-                            ${this.escapeHtml(step)}
-                        </p>
-                    </label>
-                `).join('');
-
-                // Render Scaled Ingredients
-                this.renderScaledIngredients();
-
+                this.renderScaledView();
                 window.scrollTo(0,0);
             },
 
-            // PDF Export Function
+            toggleFractions() {
+                this.useFractions = !this.useFractions;
+                const btn = document.getElementById('btnFractions');
+                if (this.useFractions) {
+                    btn.classList.add('bg-chef-500', 'text-white', 'border-chef-500');
+                    btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'hover:text-chef-600', 'hover:bg-orange-50', 'dark:hover:bg-gray-800');
+                } else {
+                    btn.classList.remove('bg-chef-500', 'text-white', 'border-chef-500');
+                    btn.classList.add('text-gray-500', 'dark:text-gray-400', 'hover:text-chef-600', 'hover:bg-orange-50', 'dark:hover:bg-gray-800');
+                }
+                this.renderScaledView();
+            },
+
+            decimalToFraction(val) {
+                if (!val && val !== 0) return '';
+                if (val === 0) return '';
+                
+                const tolerance = 0.05;
+                let whole = Math.floor(val);
+                let decimal = val - whole;
+                
+                if (decimal < tolerance) return whole > 0 ? whole.toString() : '';
+                if (Math.abs(decimal - 1) < tolerance) return (whole + 1).toString();
+                
+                const fractions = [
+                    { n: 1, d: 8, c: "&#8539;" }, { n: 1, d: 4, c: "&frac14;" }, { n: 1, d: 3, c: "&#8531;" },
+                    { n: 3, d: 8, c: "&#8540;" }, { n: 1, d: 2, c: "&frac12;" }, { n: 5, d: 8, c: "&#8541;" },
+                    { n: 2, d: 3, c: "&#8532;" }, { n: 3, d: 4, c: "&frac34;" }, { n: 7, d: 8, c: "&#8542;" }
+                ];
+                
+                let bestMatch = null;
+                let minDiff = tolerance;
+                
+                for (const frac of fractions) {
+                    const diff = Math.abs(decimal - (frac.n / frac.d));
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        bestMatch = frac.c;
+                    }
+                }
+                
+                if (bestMatch) {
+                    return whole > 0 ? `${whole} <span class="text-lg leading-none align-middle">${bestMatch}</span>` : `<span class="text-lg leading-none align-middle">${bestMatch}</span>`;
+                }
+                
+                return parseFloat(val.toFixed(2));
+            },
+
+            renderScaledView() {
+                if (!this.currentRecipe) return;
+                const baseServings = parseInt(this.currentRecipe.servings) || 1;
+                const ratio = this.currentServings / baseServings;
+                const useConversion = ratio !== 1;
+
+                const listEl = document.getElementById('detailIngredients');
+                listEl.innerHTML = this.currentRecipe.ingredients.map(ing => {
+                    let displayString = this.formatIngredient(ing, ratio, useConversion);
+                    return `
+                    <label class="flex items-start gap-3 p-3 hover:bg-orange-50 dark:hover:bg-gray-800 rounded-xl cursor-pointer select-none">
+                        <input type="checkbox" class="peer sr-only">
+                        <div class="w-6 h-6 flex-shrink-0 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:bg-chef-500 peer-checked:border-chef-500 flex items-center justify-center mt-0.5">
+                            <i class="fa-solid fa-check text-white text-xs opacity-0 peer-checked:opacity-100 transform scale-50 peer-checked:scale-100 transition-all"></i>
+                        </div>
+                        <div class="text-gray-700 dark:text-gray-300 peer-checked:text-gray-400 peer-checked:line-through">${displayString}</div>
+                    </label>`;
+                }).join('');
+
+                const stepList = document.getElementById('detailSteps');
+                stepList.innerHTML = this.currentRecipe.steps.map((step, index) => {
+                    // Ingredient Parse
+                    let parsedStep = step.replace(/\{\{(\d+):?([^}]*)?\}\}/g, (match, idx, amountStr) => {
+                        const i = parseInt(idx);
+                        let multiplier = 1;
+                        if (amountStr) {
+                            if (amountStr.includes('/')) {
+                                const [num, den] = amountStr.split('/').map(Number);
+                                multiplier = den ? num / den : 1;
+                            } else {
+                                const n = parseFloat(amountStr);
+                                multiplier = n > 1 ? n / 100 : n;
+                            }
+                        }
+                        if (this.currentRecipe.ingredients[i]) {
+                            const ing = this.currentRecipe.ingredients[i];
+                            if (multiplier === 1) return `<span class="dynamic-ing">${this.escapeHtml(ing.name)}</span>`;
+                            const partialIng = { ...ing };
+                            if (partialIng.qty) partialIng.qty = parseFloat(partialIng.qty) * multiplier;
+                            return `<span class="dynamic-ing">${this.formatIngredient(partialIng, ratio, useConversion)}</span>`;
+                        }
+                        return match; 
+                    });
+
+                    // Timer Parse: {{timer:10}} or {{timer:1.5}}
+                    parsedStep = parsedStep.replace(/\{\{timer:([\d\.]+)\}\}/g, (match, duration) => {
+                        return `<button type="button" class="timer-btn" data-minutes="${duration}" onclick="app.toggleTimer(this, ${duration})">
+                            <i class="fa-solid fa-clock"></i> <span>${duration}m</span>
+                        </button>`;
+                    });
+
+                    return `
+                    <label class="flex gap-4 group cursor-pointer select-none step-container">
+                        <input type="checkbox" class="peer sr-only">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-chef-100 dark:bg-chef-900 text-chef-600 dark:text-chef-400 font-bold flex items-center justify-center text-sm peer-checked:bg-green-500 peer-checked:text-white">
+                            <span class="group-hover:hidden peer-checked:hidden">${index + 1}</span>
+                            <i class="fa-solid fa-check hidden group-hover:block peer-checked:block"></i>
+                        </div>
+                        <div class="text-gray-700 dark:text-gray-300 mt-1 leading-relaxed peer-checked:text-gray-400 peer-checked:line-through w-full">${parsedStep}</div>
+                    </label>`;
+                }).join('');
+            },
+
+            playBeep() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5);
+                    
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.5);
+                } catch(e) { console.error("Audio error", e); }
+            },
+
+            toggleTimer(btn, minutes) {
+                // Prevent event bubbling to the step checkbox
+                event.preventDefault(); 
+                event.stopPropagation();
+
+                const id = btn.dataset.timerId || Math.random().toString(36).substr(2, 9);
+                btn.dataset.timerId = id;
+
+                // Stop if running or ringing
+                if (this.timers[id]) {
+                    clearInterval(this.timers[id].interval);
+                    clearInterval(this.timers[id].beepInterval);
+                    delete this.timers[id];
+                    btn.classList.remove('running', 'finished');
+                    btn.innerHTML = `<i class="fa-solid fa-clock"></i> <span>${minutes}m</span>`;
+                    return;
+                }
+
+                // If it was finished (visual only from legacy), reset it
+                if (btn.classList.contains('finished')) {
+                    btn.classList.remove('finished');
+                    btn.innerHTML = `<i class="fa-solid fa-clock"></i> <span>${minutes}m</span>`;
+                    return;
+                }
+
+                // Start
+                const endTime = Date.now() + (minutes * 60 * 1000);
+                btn.classList.add('running');
+                
+                this.updateTimerBtn(btn, endTime, id, minutes); // Initial draw
+                
+                this.timers[id] = {
+                    endTime: endTime,
+                    interval: setInterval(() => {
+                        this.updateTimerBtn(btn, endTime, id, minutes);
+                    }, 1000)
+                };
+            },
+
+            updateTimerBtn(btn, endTime, id, originalMinutes) {
+                const now = Date.now();
+                const diff = endTime - now;
+
+                if (diff <= 0) {
+                    clearInterval(this.timers[id].interval);
+                    
+                    btn.classList.remove('running');
+                    btn.classList.add('finished');
+                    btn.innerHTML = `<i class="fa-solid fa-bell-slash"></i> <span>Stop</span>`;
+                    
+                    // Send Notification
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification("Timer Finished!", { 
+                            body: `Your ${originalMinutes} minute timer is up!`,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/3565/3565418.png' 
+                        });
+                    }
+                    
+                    this.showToast('Timer finished!', 'success');
+                    
+                    // Start Beeping Loop
+                    this.playBeep(); // Immediate beep
+                    this.timers[id].beepInterval = setInterval(() => {
+                        this.playBeep();
+                        // Visual flash effect on button
+                        btn.classList.toggle('opacity-75');
+                    }, 2000); 
+                    
+                    return;
+                }
+
+                const m = Math.floor(diff / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                btn.innerHTML = `<i class="fa-solid fa-stopwatch"></i> <span>${m}:${s.toString().padStart(2, '0')}</span>`;
+            },
+
+            stopAllTimers() {
+                Object.values(this.timers).forEach(t => {
+                    clearInterval(t.interval);
+                    clearInterval(t.beepInterval);
+                });
+                this.timers = {};
+            },
+
+            formatIngredient(ing, ratio, useConversion) {
+                if (typeof ing === 'string') return this.escapeHtml(ing);
+                let qtyDisplay = "", finalUnit = ing.unit;
+                if (ing.qty) {
+                    let scaledRaw = parseFloat(ing.qty) * ratio;
+                    if (ing.unit && useConversion) {
+                        const result = this.smartConvert(scaledRaw, ing.unit);
+                        scaledRaw = result.qty;
+                        finalUnit = result.unit;
+                    }
+                    
+                    let val;
+                    if (this.useFractions) {
+                        val = this.decimalToFraction(scaledRaw);
+                    } else {
+                        val = Math.round(scaledRaw * 1000) / 1000;
+                    }
+                    
+                    qtyDisplay = `<span class="font-bold text-chef-600 dark:text-chef-400 mr-1">${val}</span>`;
+                }
+                let unitDisplay = finalUnit ? `<span class="text-gray-500 dark:text-gray-400 mr-1 text-sm">${this.escapeHtml(finalUnit)}</span>` : '';
+                return `${qtyDisplay}${unitDisplay}${this.escapeHtml(ing.name)}`;
+            },
+
             exportToPDF() {
                 if (!this.currentRecipe) return;
-
                 const element = document.getElementById('recipe-content-to-print');
                 const actions = document.getElementById('detailActions');
-                
-                // Temporarily hide buttons for the print
                 if(actions) actions.style.display = 'none';
-
-                const opt = {
-                    margin:       0.5,
-                    filename:     `${this.currentRecipe.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(element).save().then(() => {
-                    // Bring buttons back
-                    if(actions) actions.style.display = 'flex';
-                }).catch(err => {
-                    console.error(err);
-                    if(actions) actions.style.display = 'flex';
-                    this.showToast('Error creating PDF', 'error');
-                });
+                const opt = { margin: 0.5, filename: `${this.currentRecipe.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+                html2pdf().set(opt).from(element).save().then(() => { if(actions) actions.style.display = 'flex'; });
             },
 
             adjustServings(change) {
@@ -494,127 +779,109 @@
                 if (newS < 1) newS = 1;
                 this.currentServings = newS;
                 document.getElementById('detailServingsInput').value = newS;
-                this.renderScaledIngredients();
+                this.renderScaledView();
             },
 
-            // SMART CONVERSION LOGIC
             smartConvert(qty, unit) {
-                // Find which family this unit belongs to
                 let family = null;
                 if (UNIT_DATA.vol_imp.units.some(u => u.name === unit)) family = UNIT_DATA.vol_imp;
                 else if (UNIT_DATA.vol_metric.units.some(u => u.name === unit)) family = UNIT_DATA.vol_metric;
                 else if (UNIT_DATA.wgt_imp.units.some(u => u.name === unit)) family = UNIT_DATA.wgt_imp;
                 else if (UNIT_DATA.wgt_metric.units.some(u => u.name === unit)) family = UNIT_DATA.wgt_metric;
-
-                // If not a scalable unit family (e.g. 'can'), just return scaled qty
                 if (!family) return { qty, unit };
-
-                // 1. Normalize to base unit (e.g. tsp or ml)
-                const currentUnitData = family.units.find(u => u.name === unit);
-                const baseQty = qty * currentUnitData.val;
-
-                // 2. Find best fit
-                // Iterate largest to smallest
+                const baseQty = qty * family.units.find(u => u.name === unit).val;
                 for (const u of family.units) {
                     const converted = baseQty / u.val;
-                    // Threshold: We switch to this unit if the value is >= 0.25 (e.g. 1/4 cup)
-                    // But if it's the smallest unit, we just take it.
-                    if (converted >= 0.25 || u.name === family.units[family.units.length - 1].name) {
-                        return { qty: converted, unit: u.name };
-                    }
+                    if (converted >= 0.124 || u.name === family.units[family.units.length - 1].name) return { qty: converted, unit: u.name };
                 }
                 return { qty, unit };
             },
 
-            renderScaledIngredients() {
-                if (!this.currentRecipe) return;
-
-                const baseServings = parseInt(this.currentRecipe.servings) || 1;
-                const ratio = this.currentServings / baseServings;
-                
-                const listEl = document.getElementById('detailIngredients');
-                
-                listEl.innerHTML = this.currentRecipe.ingredients.map(ing => {
-                    let displayString = "";
-
-                    if (typeof ing === 'string') {
-                        // Legacy support
-                        displayString = this.escapeHtml(ing);
-                    } else {
-                        // Structured Support
-                        let qtyDisplay = "";
-                        let finalUnit = ing.unit;
-                        
-                        if (ing.qty) {
-                            let scaledRaw = parseFloat(ing.qty) * ratio;
-                            
-                            // Try Smart Conversion ONLY if servings have been changed (ratio != 1)
-                            if (ing.unit && ratio !== 1) {
-                                const result = this.smartConvert(scaledRaw, ing.unit);
-                                scaledRaw = result.qty;
-                                finalUnit = result.unit;
-                            }
-
-                            // Rounding to 2 decimal places max
-                            let val = Math.round(scaledRaw * 100) / 100; 
-                            qtyDisplay = `<span class="font-bold text-chef-600 dark:text-chef-400 mr-1">${val}</span>`;
-                        }
-                        
-                        let unitDisplay = finalUnit ? `<span class="text-gray-500 dark:text-gray-400 mr-1 text-sm">${this.escapeHtml(finalUnit)}</span>` : '';
-                        
-                        displayString = `${qtyDisplay}${unitDisplay}${this.escapeHtml(ing.name)}`;
-                    }
-
-                    // Checkbox UI
-                    return `
-                    <label class="flex items-start gap-3 p-3 hover:bg-orange-50 dark:hover:bg-gray-800 rounded-xl transition-colors cursor-pointer select-none">
-                        <input type="checkbox" class="peer sr-only">
-                        <div class="w-6 h-6 flex-shrink-0 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:bg-chef-500 peer-checked:border-chef-500 flex items-center justify-center transition-all mt-0.5">
-                            <i class="fa-solid fa-check text-white text-xs opacity-0 peer-checked:opacity-100 transform scale-50 peer-checked:scale-100 transition-transform"></i>
-                        </div>
-                        <div class="text-gray-700 dark:text-gray-300 peer-checked:text-gray-400 peer-checked:line-through transition-colors">
-                            ${displayString}
-                        </div>
-                    </label>`;
-                }).join('');
+            updateIngredientToolbar() {
+                const toolbar = document.getElementById('ingredientToolbar');
+                const nameInputs = document.querySelectorAll('.ing-name');
+                const names = Array.from(nameInputs).map((input, idx) => ({ name: input.value, index: idx })).filter(i => i.name.trim());
+                if (names.length === 0) {
+                    toolbar.innerHTML = '<span class="text-gray-400 italic text-xs">Add ingredients above to see buttons here...</span>';
+                    return;
+                }
+                toolbar.innerHTML = names.map(item => `
+                    <button type="button" onclick="app.insertIngredientRef(${item.index}, '${this.escapeHtml(item.name)}')" 
+                        class="px-2 py-1 bg-chef-100 dark:bg-chef-900 text-chef-600 dark:text-chef-400 rounded hover:bg-chef-200 dark:hover:bg-chef-800 transition-colors text-xs font-medium border border-chef-200 dark:border-gray-600">
+                        ${this.escapeHtml(item.name)}
+                    </button>
+                `).join('');
             },
 
-            // Form Logic
+            insertIngredientRef(index, name) {
+                if (!this.lastFocusedStep) {
+                    const steps = document.querySelectorAll('.step-input');
+                    if(steps.length > 0) this.lastFocusedStep = steps[steps.length - 1];
+                    else return this.showToast('Please add a step first!', 'error');
+                }
+                const amount = prompt(`How much of "${name}" to use here? (e.g. 1/2, 50 for 50%, or leave blank for all)`);
+                let tag = amount && amount.trim() !== "" ? `{{${index}:${amount.trim()}}}` : `{{${index}}}`;
+                const field = this.lastFocusedStep;
+                const startPos = field.selectionStart, endPos = field.selectionEnd;
+                field.value = field.value.substring(0, startPos) + tag + field.value.substring(endPos, field.value.length);
+                field.focus();
+                field.selectionStart = startPos + tag.length;
+                field.selectionEnd = startPos + tag.length;
+            },
+
+            insertTimer(btn) {
+                const textarea = btn.closest('.step-row').querySelector('textarea');
+                if(!textarea) return;
+                
+                const mins = prompt("Enter duration in minutes (e.g., 5, 10, 1.5):");
+                if (mins && !isNaN(parseFloat(mins))) {
+                    const tag = ` {{timer:${parseFloat(mins)}}}`;
+                    const startPos = textarea.selectionStart;
+                    const endPos = textarea.selectionEnd;
+                    const text = textarea.value;
+                    textarea.value = text.substring(0, startPos) + tag + text.substring(endPos);
+                    textarea.focus();
+                    
+                    // Move cursor after the tag
+                    const newPos = startPos + tag.length;
+                    textarea.selectionStart = newPos;
+                    textarea.selectionEnd = newPos;
+                }
+            },
+
             addIngredientField(qty = '', unit = '', name = '') {
-                // Ensure dropdown supports existing unit even if custom
                 let optionsHtml = '<option value="">Unit</option>';
                 let found = false;
-                
                 STANDARD_UNITS.forEach(u => {
                     const selected = u === unit ? 'selected' : '';
                     if (u === unit) found = true;
                     optionsHtml += `<option value="${u}" ${selected}>${u}</option>`;
                 });
-
-                // If existing unit is not in standard list, add it dynamically
-                if (unit && !found) {
-                     optionsHtml += `<option value="${this.escapeHtml(unit)}" selected>${this.escapeHtml(unit)}</option>`;
-                }
+                if (unit && !found) optionsHtml += `<option value="${this.escapeHtml(unit)}" selected>${this.escapeHtml(unit)}</option>`;
 
                 const div = document.createElement('div');
-                div.className = 'grid grid-cols-10 gap-2 ing-row';
+                div.className = 'grid grid-cols-12 gap-2 ing-row';
                 div.innerHTML = `
-                    <input type="number" step="any" placeholder="1" value="${qty}" class="ing-qty col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
-                    <select class="ing-unit col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm appearance-none">
+                    <input type="number" step="any" value="${qty}" class="ing-qty col-span-3 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" placeholder="Qty">
+                    <select class="ing-unit col-span-3 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm appearance-none">
                         ${optionsHtml}
                     </select>
-                    <input type="text" placeholder="Flour" value="${this.escapeHtml(name)}" class="ing-name col-span-5 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
-                    <button type="button" onclick="this.parentElement.remove()" class="col-span-1 text-gray-400 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can"></i></button>
+                    <input type="text" value="${this.escapeHtml(name)}" onkeyup="app.updateIngredientToolbar()" class="ing-name col-span-5 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" placeholder="Ingredient">
+                    <button type="button" onclick="this.parentElement.remove(); app.updateIngredientToolbar();" class="col-span-1 text-gray-400 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can"></i></button>
                 `;
                 document.getElementById('ingredientsList').appendChild(div);
+                this.updateIngredientToolbar();
             },
 
             addStepField(value = '') {
                 const div = document.createElement('div');
-                div.className = 'flex gap-2';
+                div.className = 'flex gap-2 items-start step-row';
                 div.innerHTML = `
-                    <textarea placeholder="e.g. Mix the dry ingredients..." class="step-input flex-1 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" rows="2">${this.escapeHtml(value)}</textarea>
-                    <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-red-500 px-2 self-start mt-2"><i class="fa-solid fa-trash-can"></i></button>
+                    <textarea placeholder="e.g. Mix {{0}} with eggs..." class="step-input flex-1 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" rows="2">${this.escapeHtml(value)}</textarea>
+                    <div class="flex flex-col gap-1">
+                        <button type="button" title="Add Timer" onclick="app.insertTimer(this)" class="text-gray-400 hover:text-chef-500 px-2 py-1 rounded bg-gray-50 dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all"><i class="fa-solid fa-clock"></i></button>
+                        <button type="button" title="Remove Step" onclick="this.closest('.step-row').remove()" class="text-gray-400 hover:text-red-500 px-2 py-1 rounded bg-gray-50 dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
                 `;
                 document.getElementById('stepsList').appendChild(div);
             },
@@ -623,58 +890,54 @@
                 e.preventDefault();
                 const id = document.getElementById('editId').value;
                 const name = document.getElementById('recipeName').value;
+                const source = document.getElementById('recipeSource').value;
                 const desc = document.getElementById('recipeDesc').value;
+                const category = document.getElementById('recipeCategory').value; // Capture category
                 const prep = document.getElementById('recipePrep').value;
                 const servings = document.getElementById('recipeServings').value;
 
-                // Collect structured ingredients
-                const ingredientRows = document.querySelectorAll('.ing-row');
-                const ingredients = [];
-                ingredientRows.forEach(row => {
+                const ingredients = Array.from(document.querySelectorAll('.ing-row')).map(row => {
                     const qty = row.querySelector('.ing-qty').value.trim();
                     const unit = row.querySelector('.ing-unit').value.trim();
                     const itemName = row.querySelector('.ing-name').value.trim();
-                    
-                    if (itemName) {
-                        ingredients.push({ qty, unit, name: itemName });
-                    }
-                });
+                    return itemName ? { qty, unit, name: itemName } : null;
+                }).filter(v => v);
                 
-                const steps = Array.from(document.querySelectorAll('.step-input'))
-                    .map(input => input.value.trim()).filter(v => v);
+                const steps = Array.from(document.querySelectorAll('.step-input')).map(input => input.value.trim()).filter(v => v);
 
-                if (ingredients.length === 0 || steps.length === 0) {
-                    this.showToast('Please add at least one ingredient and step!', 'error');
-                    return;
-                }
+                if (ingredients.length === 0 || steps.length === 0) return this.showToast('Add at least one ingredient and step!', 'error');
 
-                const recipeData = {
-                    name, 
-                    description: desc, 
-                    prepTime: prep, 
-                    servings: servings, 
-                    ingredients, 
-                    steps, 
-                    updatedAt: new Date()
-                };
+                const recipeData = { name, source, description: desc, category, prepTime: prep, servings, ingredients, steps, updatedAt: new Date() };
 
                 if (id) {
                     const index = this.recipes.findIndex(r => r.id === id);
-                    if (index !== -1) {
-                        this.recipes[index] = { ...this.recipes[index], ...recipeData };
-                    }
+                    if (index !== -1) this.recipes[index] = { ...this.recipes[index], ...recipeData };
                 } else {
-                    const newRecipe = {
-                        id: Date.now().toString(),
-                        ...recipeData,
-                        createdAt: new Date()
-                    };
-                    this.recipes.unshift(newRecipe);
+                    this.recipes.unshift({ id: Date.now().toString(), ...recipeData, createdAt: new Date() });
                 }
 
                 this.saveToStorage();
                 this.showHome();
-                this.showToast('Recipe saved successfully!');
+                this.showToast('Recipe saved!');
+            },
+
+            duplicateRecipe(id) {
+                const original = this.recipes.find(r => r.id === id);
+                if (!original) return;
+                
+                // Deep clone
+                const newRecipe = JSON.parse(JSON.stringify(original));
+                
+                // Update fields
+                newRecipe.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                newRecipe.name = `${original.name} (Copy)`;
+                newRecipe.createdAt = new Date();
+                newRecipe.updatedAt = new Date();
+                
+                this.recipes.unshift(newRecipe);
+                this.saveToStorage();
+                this.openDetail(newRecipe.id); 
+                this.showToast('Recipe duplicated!');
             },
 
             deleteRecipe(id) {
@@ -684,48 +947,34 @@
                 this.showToast('Recipe deleted.');
             },
 
-            // Import / Export
             exportRecipes() {
-                if (this.recipes.length === 0) {
-                    this.showToast('No recipes to export!', 'error');
-                    return;
-                }
-                const dataStr = JSON.stringify(this.recipes, null, 2);
-                const blob = new Blob([dataStr], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
+                if (this.recipes.length === 0) return this.showToast('No recipes to export!', 'error');
+                const blob = new Blob([JSON.stringify(this.recipes, null, 2)], { type: "application/json" });
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = URL.createObjectURL(blob);
                 a.download = `cookbook_backup_${new Date().toISOString().slice(0,10)}.json`;
-                document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
                 this.showToast('Cookbook exported!');
             },
 
             importRecipes(input) {
                 const file = input.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const imported = JSON.parse(e.target.result);
                         if (Array.isArray(imported)) {
-                            let count = 0;
                             imported.forEach(newR => {
                                 if(newR.name) {
                                     newR.id = Date.now().toString() + Math.random().toString(36).substr(2, 9); 
                                     this.recipes.unshift(newR);
-                                    count++;
                                 }
                             });
                             this.saveToStorage();
-                            this.showToast(`${count} recipes imported successfully!`);
+                            this.showToast('Recipes imported!');
                         }
-                    } catch (err) {
-                        this.showToast('Failed to import file.', 'error');
-                    }
+                    } catch (err) { this.showToast('Failed to import file.', 'error'); }
                     input.value = '';
                 };
                 reader.readAsText(file);
@@ -733,72 +982,52 @@
 
             renderRecipeList() {
                 const grid = document.getElementById('recipeGrid');
-                const empty = document.getElementById('emptyState');
-                const countSpan = document.getElementById('recipeCount');
                 const term = document.getElementById('searchInput').value.toLowerCase();
-
+                const categoryFilter = document.getElementById('categoryFilter').value;
+                
                 const filtered = this.recipes.filter(r => {
-                    const nameMatch = r.name.toLowerCase().includes(term);
-                    const ingMatch = r.ingredients && r.ingredients.some(i => {
-                        if (typeof i === 'string') return i.toLowerCase().includes(term);
-                        return i.name.toLowerCase().includes(term);
-                    });
-                    return nameMatch || ingMatch;
+                    const matchesSearch = r.name.toLowerCase().includes(term) || (r.ingredients && r.ingredients.some(i => i.name.toLowerCase().includes(term)));
+                    const matchesCategory = categoryFilter === "" || r.category === categoryFilter;
+                    return matchesSearch && matchesCategory;
                 });
-
-                countSpan.textContent = filtered.length;
+                
+                document.getElementById('recipeCount').textContent = filtered.length;
 
                 if (filtered.length === 0) {
                     grid.innerHTML = '';
-                    empty.classList.remove('hidden');
+                    document.getElementById('emptyState').classList.remove('hidden');
                     return;
                 }
 
-                empty.classList.add('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
                 grid.innerHTML = filtered.map(recipe => `
                     <div onclick="app.openDetail('${recipe.id}')" class="bg-white dark:bg-dark-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md hover:border-chef-200 dark:hover:border-gray-700 transition-all cursor-pointer group flex flex-col h-full overflow-hidden">
-                        <div class="h-32 bg-orange-50 dark:bg-gray-800 relative overflow-hidden group-hover:bg-orange-100 dark:group-hover:bg-gray-700 transition-colors">
-                            <div class="absolute inset-0 flex items-center justify-center text-chef-200 dark:text-gray-600 group-hover:text-chef-300 dark:group-hover:text-gray-500 transition-colors">
-                                <i class="fa-solid fa-utensils text-5xl transform -rotate-12"></i>
-                            </div>
-                        </div>
                         <div class="p-5 flex-grow flex flex-col">
-                            <h3 class="font-serif font-bold text-xl text-gray-800 dark:text-gray-100 mb-2 line-clamp-1 group-hover:text-chef-600 dark:group-hover:text-chef-400 transition-colors">${this.escapeHtml(recipe.name)}</h3>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-serif font-bold text-xl text-gray-800 dark:text-gray-100 line-clamp-1 group-hover:text-chef-600 dark:group-hover:text-chef-400 flex-grow pr-2">${this.escapeHtml(recipe.name)}</h3>
+                                ${recipe.category ? `<span class="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-md whitespace-nowrap">${this.escapeHtml(recipe.category)}</span>` : ''}
+                            </div>
+                            <p class="text-xs text-chef-500 font-medium mb-2">${this.escapeHtml(recipe.source || '')}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 flex-grow">${this.escapeHtml(recipe.description || 'No description.')}</p>
-                            
-                            <div class="flex items-center justify-between text-xs font-medium text-gray-400 dark:text-gray-500 pt-4 border-t border-gray-50 dark:border-gray-800">
-                                <span class="flex items-center"><i class="fa-regular fa-clock mr-1"></i> ${this.escapeHtml(recipe.prepTime || '--')}</span>
-                                <span class="flex items-center"><i class="fa-solid fa-list-ul mr-1"></i> ${recipe.ingredients.length} ings</span>
+                            <div class="flex items-center justify-between text-xs text-gray-400 pt-4 border-t border-gray-50 dark:border-gray-800">
+                                <span><i class="fa-regular fa-clock mr-1"></i> ${this.escapeHtml(recipe.prepTime || '--')}</span>
+                                <span><i class="fa-solid fa-list-ul mr-1"></i> ${recipe.ingredients.length} ings</span>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
             },
 
             showToast(msg, type = 'success') {
                 const toast = document.getElementById('toast');
-                const icon = document.getElementById('toastIcon');
-                const text = document.getElementById('toastMessage');
-                text.textContent = msg;
-                if (type === 'error') {
-                    icon.className = 'fa-solid fa-circle-exclamation text-red-400';
-                } else {
-                    icon.className = 'fa-solid fa-circle-check text-green-400 dark:text-green-500';
-                }
+                document.getElementById('toastMessage').textContent = msg;
+                document.getElementById('toastIcon').className = type === 'error' ? 'fa-solid fa-circle-exclamation text-red-400' : 'fa-solid fa-circle-check text-green-400 dark:text-green-500';
                 toast.classList.remove('translate-y-20', 'opacity-0');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
+                setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
             },
 
             escapeHtml(text) {
                 if (!text) return '';
-                return String(text)
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
+                return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             }
         };
 
