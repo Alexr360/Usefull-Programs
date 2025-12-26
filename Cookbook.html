@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Digital Cookbook</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -50,7 +51,6 @@
             background: rgba(17, 24, 39, 0.95);
             border: 1px solid rgba(55, 65, 81, 0.5);
         }
-        /* Hide number input arrows */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -139,32 +139,24 @@
                 <form id="recipeForm" onsubmit="app.saveRecipe(event)" class="p-6 space-y-6">
                     <input type="hidden" id="editId">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2 space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recipe Name</label>
-                                <input type="text" id="recipeName" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="e.g., Mom's Lasagna">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                                <textarea id="recipeDesc" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="A short description of the dish..."></textarea>
-                            </div>
-                            <div class="flex gap-4">
-                                <div class="w-1/2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-regular fa-clock mr-1"></i> Prep Time</label>
-                                    <input type="text" id="recipePrep" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 30 mins">
-                                </div>
-                                <div class="w-1/2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-solid fa-users mr-1"></i> Base Servings</label>
-                                    <input type="number" id="recipeServings" required min="1" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 4">
-                                </div>
-                            </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recipe Name</label>
+                            <input type="text" id="recipeName" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="e.g., Mom's Lasagna">
                         </div>
-                        
-                        <div class="bg-orange-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-orange-200 dark:border-gray-700 flex flex-col items-center justify-center p-6 text-center text-chef-400 dark:text-gray-500">
-                            <i class="fa-solid fa-camera text-3xl mb-2"></i>
-                            <span class="text-xs font-medium">Recipe Image</span>
-                            <span class="text-[10px] opacity-70 mt-1">(Text storage only)</span>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                            <textarea id="recipeDesc" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 focus:border-chef-500 outline-none" placeholder="A short description of the dish..."></textarea>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-regular fa-clock mr-1"></i> Prep Time</label>
+                                <input type="text" id="recipePrep" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 30 mins">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-solid fa-users mr-1"></i> Base Servings</label>
+                                <input type="number" id="recipeServings" required min="1" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 4">
+                            </div>
                         </div>
                     </div>
 
@@ -210,8 +202,8 @@
             <button onclick="app.showHome()" class="mb-6 flex items-center text-gray-500 dark:text-gray-400 hover:text-chef-600 dark:hover:text-chef-400 transition-colors">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Back to Cookbook
             </button>
-
-            <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden relative transition-colors">
+            
+            <div id="recipe-content-to-print" class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden relative transition-colors">
                 <div class="h-32 bg-gradient-to-r from-chef-400 to-chef-600 relative overflow-hidden">
                     <div class="absolute inset-0 opacity-20 pattern-dots"></div>
                     <div class="absolute -bottom-10 -right-10 text-white opacity-20">
@@ -226,7 +218,10 @@
                                 <h1 id="detailName" class="font-serif text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2"></h1>
                                 <p id="detailDesc" class="text-gray-600 dark:text-gray-300 leading-relaxed"></p>
                             </div>
-                            <div class="flex gap-2 self-end md:self-start">
+                            <div id="detailActions" class="flex gap-2 self-end md:self-start">
+                                <button onclick="app.exportToPDF()" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Export as PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </button>
                                 <button id="btnEdit" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Edit Recipe">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
@@ -281,6 +276,51 @@
     </div>
 
     <script>
+        // Unit Conversion Configuration
+        const UNIT_DATA = {
+            vol_imp: {
+                base: 'tsp',
+                units: [
+                    { name: 'gal', val: 768 },
+                    { name: 'qt', val: 192 },
+                    { name: 'pt', val: 96 },
+                    { name: 'cup', val: 48 },
+                    { name: 'fl oz', val: 6 },
+                    { name: 'tbsp', val: 3 },
+                    { name: 'tsp', val: 1 }
+                ]
+            },
+            vol_metric: {
+                base: 'ml',
+                units: [
+                    { name: 'l', val: 1000 },
+                    { name: 'ml', val: 1 }
+                ]
+            },
+            wgt_imp: {
+                base: 'oz',
+                units: [
+                    { name: 'lb', val: 16 },
+                    { name: 'oz', val: 1 }
+                ]
+            },
+            wgt_metric: {
+                base: 'g',
+                units: [
+                    { name: 'kg', val: 1000 },
+                    { name: 'g', val: 1 }
+                ]
+            }
+        };
+
+        const STANDARD_UNITS = [
+            'tsp', 'tbsp', 'fl oz', 'cup', 'pt', 'qt', 'gal',
+            'ml', 'l',
+            'oz', 'lb',
+            'g', 'kg',
+            'can', 'pinch', 'clove', 'slice', 'pkg'
+        ];
+
         const app = {
             recipes: [],
             currentRecipe: null, 
@@ -421,12 +461,69 @@
                 window.scrollTo(0,0);
             },
 
+            // PDF Export Function
+            exportToPDF() {
+                if (!this.currentRecipe) return;
+
+                const element = document.getElementById('recipe-content-to-print');
+                const actions = document.getElementById('detailActions');
+                
+                // Temporarily hide buttons for the print
+                if(actions) actions.style.display = 'none';
+
+                const opt = {
+                    margin:       0.5,
+                    filename:     `${this.currentRecipe.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // Bring buttons back
+                    if(actions) actions.style.display = 'flex';
+                }).catch(err => {
+                    console.error(err);
+                    if(actions) actions.style.display = 'flex';
+                    this.showToast('Error creating PDF', 'error');
+                });
+            },
+
             adjustServings(change) {
                 let newS = this.currentServings + change;
                 if (newS < 1) newS = 1;
                 this.currentServings = newS;
                 document.getElementById('detailServingsInput').value = newS;
                 this.renderScaledIngredients();
+            },
+
+            // SMART CONVERSION LOGIC
+            smartConvert(qty, unit) {
+                // Find which family this unit belongs to
+                let family = null;
+                if (UNIT_DATA.vol_imp.units.some(u => u.name === unit)) family = UNIT_DATA.vol_imp;
+                else if (UNIT_DATA.vol_metric.units.some(u => u.name === unit)) family = UNIT_DATA.vol_metric;
+                else if (UNIT_DATA.wgt_imp.units.some(u => u.name === unit)) family = UNIT_DATA.wgt_imp;
+                else if (UNIT_DATA.wgt_metric.units.some(u => u.name === unit)) family = UNIT_DATA.wgt_metric;
+
+                // If not a scalable unit family (e.g. 'can'), just return scaled qty
+                if (!family) return { qty, unit };
+
+                // 1. Normalize to base unit (e.g. tsp or ml)
+                const currentUnitData = family.units.find(u => u.name === unit);
+                const baseQty = qty * currentUnitData.val;
+
+                // 2. Find best fit
+                // Iterate largest to smallest
+                for (const u of family.units) {
+                    const converted = baseQty / u.val;
+                    // Threshold: We switch to this unit if the value is >= 0.25 (e.g. 1/4 cup)
+                    // But if it's the smallest unit, we just take it.
+                    if (converted >= 0.25 || u.name === family.units[family.units.length - 1].name) {
+                        return { qty: converted, unit: u.name };
+                    }
+                }
+                return { qty, unit };
             },
 
             renderScaledIngredients() {
@@ -446,18 +543,29 @@
                     } else {
                         // Structured Support
                         let qtyDisplay = "";
+                        let finalUnit = ing.unit;
+                        
                         if (ing.qty) {
-                            let val = parseFloat(ing.qty) * ratio;
-                            val = Math.round(val * 100) / 100; 
+                            let scaledRaw = parseFloat(ing.qty) * ratio;
+                            
+                            // Try Smart Conversion ONLY if servings have been changed (ratio != 1)
+                            if (ing.unit && ratio !== 1) {
+                                const result = this.smartConvert(scaledRaw, ing.unit);
+                                scaledRaw = result.qty;
+                                finalUnit = result.unit;
+                            }
+
+                            // Rounding to 2 decimal places max
+                            let val = Math.round(scaledRaw * 100) / 100; 
                             qtyDisplay = `<span class="font-bold text-chef-600 dark:text-chef-400 mr-1">${val}</span>`;
                         }
                         
-                        let unitDisplay = ing.unit ? `<span class="text-gray-500 dark:text-gray-400 mr-1 text-sm">${this.escapeHtml(ing.unit)}</span>` : '';
+                        let unitDisplay = finalUnit ? `<span class="text-gray-500 dark:text-gray-400 mr-1 text-sm">${this.escapeHtml(finalUnit)}</span>` : '';
                         
                         displayString = `${qtyDisplay}${unitDisplay}${this.escapeHtml(ing.name)}`;
                     }
 
-                    // Custom Checkbox UI
+                    // Checkbox UI
                     return `
                     <label class="flex items-start gap-3 p-3 hover:bg-orange-50 dark:hover:bg-gray-800 rounded-xl transition-colors cursor-pointer select-none">
                         <input type="checkbox" class="peer sr-only">
@@ -473,11 +581,28 @@
 
             // Form Logic
             addIngredientField(qty = '', unit = '', name = '') {
+                // Ensure dropdown supports existing unit even if custom
+                let optionsHtml = '<option value="">Unit</option>';
+                let found = false;
+                
+                STANDARD_UNITS.forEach(u => {
+                    const selected = u === unit ? 'selected' : '';
+                    if (u === unit) found = true;
+                    optionsHtml += `<option value="${u}" ${selected}>${u}</option>`;
+                });
+
+                // If existing unit is not in standard list, add it dynamically
+                if (unit && !found) {
+                     optionsHtml += `<option value="${this.escapeHtml(unit)}" selected>${this.escapeHtml(unit)}</option>`;
+                }
+
                 const div = document.createElement('div');
                 div.className = 'grid grid-cols-10 gap-2 ing-row';
                 div.innerHTML = `
                     <input type="number" step="any" placeholder="1" value="${qty}" class="ing-qty col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
-                    <input type="text" placeholder="cup" value="${this.escapeHtml(unit)}" class="ing-unit col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
+                    <select class="ing-unit col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm appearance-none">
+                        ${optionsHtml}
+                    </select>
                     <input type="text" placeholder="Flour" value="${this.escapeHtml(name)}" class="ing-name col-span-5 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
                     <button type="button" onclick="this.parentElement.remove()" class="col-span-1 text-gray-400 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can"></i></button>
                 `;
