@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Digital Cookbook</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        chef: {
+                            50: '#fff8f1',
+                            100: '#feecdc',
+                            200: '#fcd5c2',
+                            300: '#fcba9f',
+                            400: '#f88f70',
+                            500: '#f06543', // Primary Orange
+                            600: '#db462c',
+                            700: '#b63321',
+                            800: '#922a21',
+                            900: '#782620',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #fff8f1;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom checkbox style for ingredients */
+        .check-step:checked + div {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-orange-100 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="app.showHome()">
+                    <div class="bg-chef-500 text-white p-2 rounded-lg">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h1 class="font-serif text-2xl font-bold text-gray-900 tracking-tight">Cookbook</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="app.exportRecipes()" class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-chef-600 transition-colors" title="Download Cookbook">
+                        <i class="fa-solid fa-download"></i> Export
+                    </button>
+                    <label class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-chef-600 transition-colors cursor-pointer" title="Load Cookbook">
+                        <i class="fa-solid fa-upload"></i> Import
+                        <input type="file" id="importFile" accept=".json" class="hidden" onchange="app.importRecipes(this)">
+                    </label>
+                    <button onclick="app.openEditor()" class="ml-2 bg-chef-500 hover:bg-chef-600 text-white px-4 py-2 rounded-full font-medium shadow-md transition-all transform hover:scale-105 flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">New Recipe</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+        
+        <!-- View: Recipe List (Home) -->
+        <div id="view-home" class="animate-fade-in">
+            <!-- Search & Filter -->
+            <div class="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div class="relative w-full sm:max-w-md">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="searchInput" placeholder="Search recipes, ingredients..." 
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-chef-500 focus:ring-2 focus:ring-chef-200 outline-none shadow-sm transition-all"
+                           onkeyup="app.renderRecipeList()">
+                </div>
+                <div class="text-sm text-gray-500">
+                    <span id="recipeCount">0</span> Recipes stored
+                </div>
+                <!-- Mobile Import/Export (Visible only on small screens) -->
+                <div class="flex sm:hidden w-full gap-2">
+                     <button onclick="app.exportRecipes()" class="flex-1 items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600">
+                        <i class="fa-solid fa-download"></i> Export
+                    </button>
+                    <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600">
+                        <i class="fa-solid fa-upload"></i> Import
+                        <input type="file" accept=".json" class="hidden" onchange="app.importRecipes(this)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                <div class="bg-orange-100 p-6 rounded-full mb-4">
+                    <i class="fa-solid fa-book-open text-4xl text-chef-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">No recipes yet</h3>
+                <p class="text-gray-500 max-w-sm mb-6">Your digital cookbook is looking a bit hungry. Start adding your favorite dishes!</p>
+                <button onclick="app.openEditor()" class="text-chef-600 font-semibold hover:underline">Create your first recipe &rarr;</button>
+            </div>
+
+            <!-- Grid -->
+            <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Recipe Cards injected here -->
+            </div>
+        </div>
+
+        <!-- View: Recipe Editor (Add/Edit) -->
+        <div id="view-editor" class="hidden max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div class="border-b border-gray-100 px-6 py-4 flex justify-between items-center bg-gray-50">
+                    <h2 class="text-xl font-bold text-gray-800" id="editorTitle">New Recipe</h2>
+                    <button onclick="app.showHome()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="recipeForm" onsubmit="app.saveRecipe(event)" class="p-6 space-y-6">
+                    <input type="hidden" id="editId">
+                    
+                    <!-- Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Recipe Name</label>
+                                <input type="text" id="recipeName" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-chef-200 focus:border-chef-500 outline-none" placeholder="e.g., Mom's Lasagna">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea id="recipeDesc" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-chef-200 focus:border-chef-500 outline-none" placeholder="A short description of the dish..."></textarea>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1"><i class="fa-regular fa-clock mr-1"></i> Prep Time</label>
+                                    <input type="text" id="recipePrep" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-chef-200 outline-none" placeholder="e.g. 30 mins">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1"><i class="fa-solid fa-users mr-1"></i> Servings</label>
+                                    <input type="text" id="recipeServings" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-chef-200 outline-none" placeholder="e.g. 4 people">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Upload Placeholder (Could be expanded later) -->
+                        <div class="bg-orange-50 rounded-xl border-2 border-dashed border-orange-200 flex flex-col items-center justify-center p-6 text-center text-chef-400">
+                            <i class="fa-solid fa-camera text-3xl mb-2"></i>
+                            <span class="text-xs font-medium">Recipe Image</span>
+                            <span class="text-[10px] opacity-70 mt-1">(Currently text-only storage)</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                        <!-- Ingredients -->
+                        <div class="bg-gray-50 p-5 rounded-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-serif font-bold text-lg text-gray-800">Ingredients</h3>
+                                <button type="button" onclick="app.addIngredientField()" class="text-xs bg-white border border-gray-200 hover:border-chef-500 hover:text-chef-600 px-2 py-1 rounded shadow-sm transition-colors">
+                                    <i class="fa-solid fa-plus mr-1"></i> Add Item
+                                </button>
+                            </div>
+                            <div id="ingredientsList" class="space-y-2">
+                                <!-- Dynamic Inputs -->
+                            </div>
+                        </div>
+
+                        <!-- Steps -->
+                        <div class="bg-gray-50 p-5 rounded-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-serif font-bold text-lg text-gray-800">Instructions</h3>
+                                <button type="button" onclick="app.addStepField()" class="text-xs bg-white border border-gray-200 hover:border-chef-500 hover:text-chef-600 px-2 py-1 rounded shadow-sm transition-colors">
+                                    <i class="fa-solid fa-plus mr-1"></i> Add Step
+                                </button>
+                            </div>
+                            <div id="stepsList" class="space-y-2">
+                                <!-- Dynamic Inputs -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button type="button" onclick="app.showHome()" class="px-6 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition-colors">Cancel</button>
+                        <button type="submit" class="px-6 py-2 rounded-lg bg-chef-500 text-white font-medium hover:bg-chef-600 shadow-md transition-all transform hover:-translate-y-0.5">Save Recipe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- View: Recipe Detail (Single View) -->
+        <div id="view-detail" class="hidden animate-fade-in max-w-4xl mx-auto">
+            <button onclick="app.showHome()" class="mb-6 flex items-center text-gray-500 hover:text-chef-600 transition-colors">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Cookbook
+            </button>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative">
+                <!-- Decorative Header -->
+                <div class="h-32 bg-gradient-to-r from-chef-400 to-chef-600 relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-20 pattern-dots"></div>
+                    <div class="absolute -bottom-10 -right-10 text-white opacity-20">
+                        <i class="fa-solid fa-utensils text-9xl"></i>
+                    </div>
+                </div>
+                
+                <div class="px-8 pb-8 -mt-12 relative">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h1 id="detailName" class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-2"></h1>
+                                <p id="detailDesc" class="text-gray-600 leading-relaxed"></p>
+                                
+                                <div class="flex gap-6 mt-4 text-sm text-gray-500">
+                                    <span class="flex items-center"><i class="fa-regular fa-clock mr-2 text-chef-500"></i> <span id="detailPrep"></span></span>
+                                    <span class="flex items-center"><i class="fa-solid fa-users mr-2 text-chef-500"></i> <span id="detailServings"></span></span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button id="btnEdit" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 rounded-lg transition-colors" title="Edit Recipe">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button id="btnDelete" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Recipe">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <h3 class="font-serif text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-orange-100">Ingredients</h3>
+                            <ul id="detailIngredients" class="space-y-3">
+                                <!-- List -->
+                            </ul>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h3 class="font-serif text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-orange-100">Instructions</h3>
+                            <div id="detailSteps" class="space-y-6">
+                                <!-- Steps -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-green-400"></i>
+        <span id="toastMessage" class="font-medium">Notification</span>
+    </div>
+
+    <script>
+        const app = {
+            recipes: [],
+            
+            init() {
+                // Load from local storage
+                const stored = localStorage.getItem('cookbook_recipes');
+                if (stored) {
+                    try {
+                        this.recipes = JSON.parse(stored);
+                    } catch (e) {
+                        console.error("Failed to parse recipes", e);
+                        this.recipes = [];
+                    }
+                }
+                this.renderRecipeList();
+            },
+
+            saveToStorage() {
+                localStorage.setItem('cookbook_recipes', JSON.stringify(this.recipes));
+                this.renderRecipeList();
+            },
+
+            // Navigation
+            showHome() {
+                document.getElementById('view-home').classList.remove('hidden');
+                document.getElementById('view-editor').classList.add('hidden');
+                document.getElementById('view-detail').classList.add('hidden');
+                window.scrollTo(0,0);
+            },
+
+            openEditor(recipeId = null) {
+                document.getElementById('view-home').classList.add('hidden');
+                document.getElementById('view-detail').classList.add('hidden');
+                document.getElementById('view-editor').classList.remove('hidden');
+                
+                const form = document.getElementById('recipeForm');
+                const title = document.getElementById('editorTitle');
+                
+                // Clear dynamic fields
+                document.getElementById('ingredientsList').innerHTML = '';
+                document.getElementById('stepsList').innerHTML = '';
+
+                if (recipeId) {
+                    // Edit Mode
+                    const recipe = this.recipes.find(r => r.id === recipeId);
+                    if (!recipe) return this.showHome();
+
+                    title.textContent = 'Edit Recipe';
+                    document.getElementById('editId').value = recipe.id;
+                    document.getElementById('recipeName').value = recipe.name;
+                    document.getElementById('recipeDesc').value = recipe.description || '';
+                    document.getElementById('recipePrep').value = recipe.prepTime || '';
+                    document.getElementById('recipeServings').value = recipe.servings || '';
+
+                    recipe.ingredients.forEach(ing => this.addIngredientField(ing));
+                    recipe.steps.forEach(step => this.addStepField(step));
+                } else {
+                    // Create Mode
+                    title.textContent = 'New Recipe';
+                    form.reset();
+                    document.getElementById('editId').value = '';
+                    // Add one empty field for start
+                    this.addIngredientField();
+                    this.addStepField();
+                }
+                window.scrollTo(0,0);
+            },
+
+            openDetail(recipeId) {
+                const recipe = this.recipes.find(r => r.id === recipeId);
+                if (!recipe) return;
+
+                document.getElementById('view-home').classList.add('hidden');
+                document.getElementById('view-editor').classList.add('hidden');
+                document.getElementById('view-detail').classList.remove('hidden');
+
+                document.getElementById('detailName').textContent = recipe.name;
+                document.getElementById('detailDesc').textContent = recipe.description || 'No description provided.';
+                document.getElementById('detailPrep').textContent = recipe.prepTime || '--';
+                document.getElementById('detailServings').textContent = recipe.servings || '--';
+
+                // Setup Actions
+                document.getElementById('btnEdit').onclick = () => this.openEditor(recipe.id);
+                document.getElementById('btnDelete').onclick = () => {
+                    if(confirm(`Delete "${recipe.name}"?`)) {
+                        this.deleteRecipe(recipe.id);
+                    }
+                };
+
+                // Ingredients
+                const ingList = document.getElementById('detailIngredients');
+                ingList.innerHTML = recipe.ingredients.map(ing => `
+                    <li class="flex items-start gap-3 p-2 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer group">
+                        <input type="checkbox" class="check-step mt-1.5 w-4 h-4 rounded border-gray-300 text-chef-600 focus:ring-chef-500 cursor-pointer">
+                        <div class="text-gray-700 group-hover:text-gray-900">${this.escapeHtml(ing)}</div>
+                    </li>
+                `).join('');
+
+                // Steps
+                const stepList = document.getElementById('detailSteps');
+                stepList.innerHTML = recipe.steps.map((step, index) => `
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-chef-100 text-chef-600 font-bold rounded-full flex items-center justify-center text-sm">
+                            ${index + 1}
+                        </div>
+                        <p class="text-gray-700 mt-1 leading-relaxed">${this.escapeHtml(step)}</p>
+                    </div>
+                `).join('');
+
+                window.scrollTo(0,0);
+            },
+
+            // Form Logic
+            addIngredientField(value = '') {
+                const div = document.createElement('div');
+                div.className = 'flex gap-2';
+                div.innerHTML = `
+                    <input type="text" value="${this.escapeHtml(value)}" placeholder="e.g. 2 cups Flour" class="ing-input flex-1 px-3 py-2 bg-white rounded border border-gray-200 focus:border-chef-500 outline-none text-sm">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-red-500 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                document.getElementById('ingredientsList').appendChild(div);
+            },
+
+            addStepField(value = '') {
+                const div = document.createElement('div');
+                div.className = 'flex gap-2';
+                div.innerHTML = `
+                    <textarea placeholder="e.g. Mix the dry ingredients..." class="step-input flex-1 px-3 py-2 bg-white rounded border border-gray-200 focus:border-chef-500 outline-none text-sm" rows="2">${this.escapeHtml(value)}</textarea>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-red-500 px-2 self-start mt-2"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                document.getElementById('stepsList').appendChild(div);
+            },
+
+            saveRecipe(e) {
+                e.preventDefault();
+                const id = document.getElementById('editId').value;
+                const name = document.getElementById('recipeName').value;
+                const desc = document.getElementById('recipeDesc').value;
+                const prep = document.getElementById('recipePrep').value;
+                const servings = document.getElementById('recipeServings').value;
+
+                // Collect ingredients and steps
+                const ingredients = Array.from(document.querySelectorAll('.ing-input'))
+                    .map(input => input.value.trim()).filter(v => v);
+                
+                const steps = Array.from(document.querySelectorAll('.step-input'))
+                    .map(input => input.value.trim()).filter(v => v);
+
+                if (ingredients.length === 0 || steps.length === 0) {
+                    this.showToast('Please add at least one ingredient and step!', 'error');
+                    return;
+                }
+
+                if (id) {
+                    // Update
+                    const index = this.recipes.findIndex(r => r.id === id);
+                    if (index !== -1) {
+                        this.recipes[index] = { ...this.recipes[index], name, description: desc, prepTime: prep, servings, ingredients, steps, updatedAt: new Date() };
+                    }
+                } else {
+                    // Create
+                    const newRecipe = {
+                        id: Date.now().toString(),
+                        name,
+                        description: desc,
+                        prepTime: prep,
+                        servings,
+                        ingredients,
+                        steps,
+                        createdAt: new Date()
+                    };
+                    this.recipes.unshift(newRecipe);
+                }
+
+                this.saveToStorage();
+                this.showHome();
+                this.showToast('Recipe saved successfully!');
+            },
+
+            deleteRecipe(id) {
+                this.recipes = this.recipes.filter(r => r.id !== id);
+                this.saveToStorage();
+                this.showHome();
+                this.showToast('Recipe deleted.');
+            },
+
+            // Import / Export
+            exportRecipes() {
+                if (this.recipes.length === 0) {
+                    this.showToast('No recipes to export!', 'error');
+                    return;
+                }
+                const dataStr = JSON.stringify(this.recipes, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cookbook_backup_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                this.showToast('Cookbook exported!');
+            },
+
+            importRecipes(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            // Merge strategy: Add ones that don't exist by ID, or just Append all?
+                            // Let's replace ID to avoid conflict if it's a fresh import, or keep if backup.
+                            // Simple strategy: Filter out invalid objects, then concat.
+                            const validRecipes = imported.filter(r => r.name && r.ingredients);
+                            
+                            // Check for duplicates based on name to be nice
+                            let count = 0;
+                            validRecipes.forEach(newR => {
+                                // Regenerate ID to ensure uniqueness upon import
+                                newR.id = Date.now().toString() + Math.random().toString(36).substr(2, 9); 
+                                this.recipes.unshift(newR);
+                                count++;
+                            });
+
+                            this.saveToStorage();
+                            this.showToast(`${count} recipes imported successfully!`);
+                        } else {
+                            throw new Error('Invalid format');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        this.showToast('Failed to import file. Invalid JSON.', 'error');
+                    }
+                    input.value = ''; // Reset file input
+                };
+                reader.readAsText(file);
+            },
+
+            // Rendering
+            renderRecipeList() {
+                const grid = document.getElementById('recipeGrid');
+                const empty = document.getElementById('emptyState');
+                const countSpan = document.getElementById('recipeCount');
+                const term = document.getElementById('searchInput').value.toLowerCase();
+
+                const filtered = this.recipes.filter(r => 
+                    r.name.toLowerCase().includes(term) || 
+                    (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(term)))
+                );
+
+                countSpan.textContent = filtered.length;
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = '';
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                empty.classList.add('hidden');
+                grid.innerHTML = filtered.map(recipe => `
+                    <div onclick="app.openDetail('${recipe.id}')" class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-chef-200 transition-all cursor-pointer group flex flex-col h-full overflow-hidden">
+                        <div class="h-32 bg-orange-50 relative overflow-hidden group-hover:bg-orange-100 transition-colors">
+                            <div class="absolute inset-0 flex items-center justify-center text-chef-200 group-hover:text-chef-300 transition-colors">
+                                <i class="fa-solid fa-utensils text-5xl transform -rotate-12"></i>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-grow flex flex-col">
+                            <h3 class="font-serif font-bold text-xl text-gray-800 mb-2 line-clamp-1 group-hover:text-chef-600 transition-colors">${this.escapeHtml(recipe.name)}</h3>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2 flex-grow">${this.escapeHtml(recipe.description || 'No description.')}</p>
+                            
+                            <div class="flex items-center justify-between text-xs font-medium text-gray-400 pt-4 border-t border-gray-50">
+                                <span class="flex items-center"><i class="fa-regular fa-clock mr-1"></i> ${this.escapeHtml(recipe.prepTime || '--')}</span>
+                                <span class="flex items-center"><i class="fa-solid fa-list-ul mr-1"></i> ${recipe.ingredients.length} ings</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            showToast(msg, type = 'success') {
+                const toast = document.getElementById('toast');
+                const icon = document.getElementById('toastIcon');
+                const text = document.getElementById('toastMessage');
+
+                text.textContent = msg;
+                if (type === 'error') {
+                    icon.className = 'fa-solid fa-circle-exclamation text-red-400';
+                } else {
+                    icon.className = 'fa-solid fa-circle-check text-green-400';
+                }
+
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            },
+
+            escapeHtml(text) {
+                if (!text) return '';
+                return text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        };
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
