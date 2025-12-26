@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Digital Cookbook</title>
-    <!-- Tailwind CSS -->
+    <title>Smart Digital Cookbook</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
@@ -44,7 +41,6 @@
         }
     </script>
     <style>
-        /* Body background handled by Tailwind classes now for Dark Mode support */
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -54,26 +50,16 @@
             background: rgba(17, 24, 39, 0.95);
             border: 1px solid rgba(55, 65, 81, 0.5);
         }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Custom checkbox style for ingredients */
-        .check-step:checked + div {
-            text-decoration: line-through;
-            color: #9ca3af; /* gray-400 */
-        }
-        .dark .check-step:checked + div {
-            color: #6b7280; /* gray-500 */
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
         }
     </style>
 </head>
 <body class="text-gray-800 dark:text-gray-200 bg-chef-50 dark:bg-dark-950 min-h-screen flex flex-col transition-colors duration-300">
 
-    <!-- Navbar -->
     <nav class="bg-white dark:bg-dark-900 border-b border-orange-100 dark:border-gray-800 sticky top-0 z-40 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -84,16 +70,15 @@
                     <h1 class="font-serif text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Cookbook</h1>
                 </div>
                 <div class="flex items-center gap-2">
-                    <!-- Dark Mode Toggle -->
                     <button onclick="app.toggleTheme()" class="p-2 mr-1 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors" title="Toggle Dark Mode">
                         <i class="fa-solid fa-moon block dark:hidden"></i>
                         <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
                     </button>
 
-                    <button onclick="app.exportRecipes()" class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-chef-600 dark:hover:text-chef-400 transition-colors" title="Download Cookbook">
+                    <button onclick="app.exportRecipes()" class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-chef-600 dark:hover:text-chef-400 transition-colors">
                         <i class="fa-solid fa-download"></i> Export
                     </button>
-                    <label class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-chef-600 dark:hover:text-chef-400 transition-colors cursor-pointer" title="Load Cookbook">
+                    <label class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-chef-600 dark:hover:text-chef-400 transition-colors cursor-pointer">
                         <i class="fa-solid fa-upload"></i> Import
                         <input type="file" id="importFile" accept=".json" class="hidden" onchange="app.importRecipes(this)">
                     </label>
@@ -105,12 +90,9 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
         
-        <!-- View: Recipe List (Home) -->
         <div id="view-home" class="animate-fade-in">
-            <!-- Search & Filter -->
             <div class="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
                 <div class="relative w-full sm:max-w-md">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -121,7 +103,6 @@
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                     <span id="recipeCount">0</span> Recipes stored
                 </div>
-                <!-- Mobile Import/Export (Visible only on small screens) -->
                 <div class="flex sm:hidden w-full gap-2">
                      <button onclick="app.exportRecipes()" class="flex-1 items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-dark-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300">
                         <i class="fa-solid fa-download"></i> Export
@@ -133,7 +114,6 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
             <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
                 <div class="bg-orange-100 dark:bg-gray-800 p-6 rounded-full mb-4 transition-colors">
                     <i class="fa-solid fa-book-open text-4xl text-chef-400"></i>
@@ -143,13 +123,10 @@
                 <button onclick="app.openEditor()" class="text-chef-600 dark:text-chef-400 font-semibold hover:underline">Create your first recipe &rarr;</button>
             </div>
 
-            <!-- Grid -->
             <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Recipe Cards injected here -->
-            </div>
+                </div>
         </div>
 
-        <!-- View: Recipe Editor (Add/Edit) -->
         <div id="view-editor" class="hidden max-w-4xl mx-auto">
             <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors">
                 <div class="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
@@ -162,7 +139,6 @@
                 <form id="recipeForm" onsubmit="app.saveRecipe(event)" class="p-6 space-y-6">
                     <input type="hidden" id="editId">
                     
-                    <!-- Basic Info -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="md:col-span-2 space-y-4">
                             <div>
@@ -179,22 +155,20 @@
                                     <input type="text" id="recipePrep" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 30 mins">
                                 </div>
                                 <div class="w-1/2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-solid fa-users mr-1"></i> Servings</label>
-                                    <input type="text" id="recipeServings" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 4 people">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fa-solid fa-users mr-1"></i> Base Servings</label>
+                                    <input type="number" id="recipeServings" required min="1" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none" placeholder="e.g. 4">
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Image Upload Placeholder (Could be expanded later) -->
                         <div class="bg-orange-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-orange-200 dark:border-gray-700 flex flex-col items-center justify-center p-6 text-center text-chef-400 dark:text-gray-500">
                             <i class="fa-solid fa-camera text-3xl mb-2"></i>
                             <span class="text-xs font-medium">Recipe Image</span>
-                            <span class="text-[10px] opacity-70 mt-1">(Currently text-only storage)</span>
+                            <span class="text-[10px] opacity-70 mt-1">(Text storage only)</span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-                        <!-- Ingredients -->
+                    <div class="grid grid-cols-1 gap-8 mt-6">
                         <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl transition-colors">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-serif font-bold text-lg text-gray-800 dark:text-white">Ingredients</h3>
@@ -202,12 +176,16 @@
                                     <i class="fa-solid fa-plus mr-1"></i> Add Item
                                 </button>
                             </div>
-                            <div id="ingredientsList" class="space-y-2">
-                                <!-- Dynamic Inputs -->
+                            <div class="grid grid-cols-10 gap-2 mb-2 px-1">
+                                <span class="col-span-2 text-xs font-bold text-gray-500 uppercase">Amount</span>
+                                <span class="col-span-2 text-xs font-bold text-gray-500 uppercase">Unit</span>
+                                <span class="col-span-5 text-xs font-bold text-gray-500 uppercase">Ingredient</span>
+                                <span class="col-span-1"></span>
                             </div>
+                            <div id="ingredientsList" class="space-y-2">
+                                </div>
                         </div>
 
-                        <!-- Steps -->
                         <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl transition-colors">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-serif font-bold text-lg text-gray-800 dark:text-white">Instructions</h3>
@@ -216,12 +194,10 @@
                                 </button>
                             </div>
                             <div id="stepsList" class="space-y-2">
-                                <!-- Dynamic Inputs -->
-                            </div>
+                                </div>
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <button type="button" onclick="app.showHome()" class="px-6 py-2 rounded-lg text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancel</button>
                         <button type="submit" class="px-6 py-2 rounded-lg bg-chef-500 text-white font-medium hover:bg-chef-600 shadow-md transition-all transform hover:-translate-y-0.5">Save Recipe</button>
@@ -230,14 +206,12 @@
             </div>
         </div>
 
-        <!-- View: Recipe Detail (Single View) -->
         <div id="view-detail" class="hidden animate-fade-in max-w-4xl mx-auto">
             <button onclick="app.showHome()" class="mb-6 flex items-center text-gray-500 dark:text-gray-400 hover:text-chef-600 dark:hover:text-chef-400 transition-colors">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Back to Cookbook
             </button>
 
             <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden relative transition-colors">
-                <!-- Decorative Header -->
                 <div class="h-32 bg-gradient-to-r from-chef-400 to-chef-600 relative overflow-hidden">
                     <div class="absolute inset-0 opacity-20 pattern-dots"></div>
                     <div class="absolute -bottom-10 -right-10 text-white opacity-20">
@@ -247,17 +221,12 @@
                 
                 <div class="px-8 pb-8 -mt-12 relative">
                     <div class="bg-white dark:bg-dark-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors">
-                        <div class="flex justify-between items-start">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h1 id="detailName" class="font-serif text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2"></h1>
                                 <p id="detailDesc" class="text-gray-600 dark:text-gray-300 leading-relaxed"></p>
-                                
-                                <div class="flex gap-6 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                    <span class="flex items-center"><i class="fa-regular fa-clock mr-2 text-chef-500"></i> <span id="detailPrep"></span></span>
-                                    <span class="flex items-center"><i class="fa-solid fa-users mr-2 text-chef-500"></i> <span id="detailServings"></span></span>
-                                </div>
                             </div>
-                            <div class="flex flex-col gap-2">
+                            <div class="flex gap-2 self-end md:self-start">
                                 <button id="btnEdit" class="p-2 text-gray-400 hover:text-chef-600 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Edit Recipe">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
@@ -266,20 +235,38 @@
                                 </button>
                             </div>
                         </div>
+
+                        <div class="flex flex-wrap gap-6 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <span class="flex items-center text-gray-600 dark:text-gray-400">
+                                <i class="fa-regular fa-clock mr-2 text-chef-500"></i> 
+                                <span id="detailPrep"></span>
+                            </span>
+                            
+                            <div class="flex items-center gap-3 bg-orange-50 dark:bg-gray-700/50 px-3 py-1 rounded-lg">
+                                <span class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-solid fa-users text-chef-500 mr-1"></i> Servings:</span>
+                                <div class="flex items-center">
+                                    <button onclick="app.adjustServings(-1)" class="w-6 h-6 rounded bg-white dark:bg-gray-600 hover:bg-chef-100 dark:hover:bg-gray-500 text-chef-600 dark:text-chef-400 flex items-center justify-center transition-colors shadow-sm">
+                                        <i class="fa-solid fa-minus text-xs"></i>
+                                    </button>
+                                    <input type="number" id="detailServingsInput" value="4" readonly class="w-10 text-center bg-transparent font-bold text-gray-800 dark:text-white outline-none">
+                                    <button onclick="app.adjustServings(1)" class="w-6 h-6 rounded bg-white dark:bg-gray-600 hover:bg-chef-100 dark:hover:bg-gray-500 text-chef-600 dark:text-chef-400 flex items-center justify-center transition-colors shadow-sm">
+                                        <i class="fa-solid fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="md:col-span-1">
                             <h3 class="font-serif text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-orange-100 dark:border-gray-700">Ingredients</h3>
-                            <ul id="detailIngredients" class="space-y-3">
-                                <!-- List -->
-                            </ul>
+                            <div id="detailIngredients" class="space-y-3">
+                                </div>
                         </div>
                         <div class="md:col-span-2">
                             <h3 class="font-serif text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 pb-2 border-b border-orange-100 dark:border-gray-700">Instructions</h3>
-                            <div id="detailSteps" class="space-y-6">
-                                <!-- Steps -->
-                            </div>
+                            <div id="detailSteps" class="space-y-4">
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -288,7 +275,6 @@
 
     </main>
 
-    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
         <i id="toastIcon" class="fa-solid fa-circle-check text-green-400 dark:text-green-600"></i>
         <span id="toastMessage" class="font-medium">Notification</span>
@@ -297,25 +283,23 @@
     <script>
         const app = {
             recipes: [],
-            
+            currentRecipe: null, 
+            currentServings: 1, 
+
             init() {
                 this.initTheme();
-                // Load from local storage
                 const stored = localStorage.getItem('cookbook_recipes');
                 if (stored) {
                     try {
                         this.recipes = JSON.parse(stored);
                     } catch (e) {
-                        console.error("Failed to parse recipes", e);
                         this.recipes = [];
                     }
                 }
                 this.renderRecipeList();
             },
 
-            // Theme Management
             initTheme() {
-                // Check localStorage or System preference
                 if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.classList.add('dark');
                 } else {
@@ -355,12 +339,10 @@
                 const form = document.getElementById('recipeForm');
                 const title = document.getElementById('editorTitle');
                 
-                // Clear dynamic fields
                 document.getElementById('ingredientsList').innerHTML = '';
                 document.getElementById('stepsList').innerHTML = '';
 
                 if (recipeId) {
-                    // Edit Mode
                     const recipe = this.recipes.find(r => r.id === recipeId);
                     if (!recipe) return this.showHome();
 
@@ -369,16 +351,23 @@
                     document.getElementById('recipeName').value = recipe.name;
                     document.getElementById('recipeDesc').value = recipe.description || '';
                     document.getElementById('recipePrep').value = recipe.prepTime || '';
-                    document.getElementById('recipeServings').value = recipe.servings || '';
+                    document.getElementById('recipeServings').value = recipe.servings || 1;
 
-                    recipe.ingredients.forEach(ing => this.addIngredientField(ing));
+                    // Handle Backward Compatibility for Ingredients
+                    recipe.ingredients.forEach(ing => {
+                        if (typeof ing === 'string') {
+                            this.addIngredientField('', '', ing);
+                        } else {
+                            this.addIngredientField(ing.qty, ing.unit, ing.name);
+                        }
+                    });
+                    
                     recipe.steps.forEach(step => this.addStepField(step));
                 } else {
-                    // Create Mode
                     title.textContent = 'New Recipe';
                     form.reset();
                     document.getElementById('editId').value = '';
-                    // Add one empty field for start
+                    document.getElementById('recipeServings').value = 4; // Default
                     this.addIngredientField();
                     this.addStepField();
                 }
@@ -389,6 +378,9 @@
                 const recipe = this.recipes.find(r => r.id === recipeId);
                 if (!recipe) return;
 
+                this.currentRecipe = recipe;
+                this.currentServings = parseInt(recipe.servings) || 1;
+
                 document.getElementById('view-home').classList.add('hidden');
                 document.getElementById('view-editor').classList.add('hidden');
                 document.getElementById('view-detail').classList.remove('hidden');
@@ -396,7 +388,9 @@
                 document.getElementById('detailName').textContent = recipe.name;
                 document.getElementById('detailDesc').textContent = recipe.description || 'No description provided.';
                 document.getElementById('detailPrep').textContent = recipe.prepTime || '--';
-                document.getElementById('detailServings').textContent = recipe.servings || '--';
+                
+                // Set initial servings input
+                document.getElementById('detailServingsInput').value = this.currentServings;
 
                 // Setup Actions
                 document.getElementById('btnEdit').onclick = () => this.openEditor(recipe.id);
@@ -406,36 +400,86 @@
                     }
                 };
 
-                // Ingredients
-                const ingList = document.getElementById('detailIngredients');
-                ingList.innerHTML = recipe.ingredients.map(ing => `
-                    <li class="flex items-start gap-3 p-2 hover:bg-orange-50 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer group">
-                        <input type="checkbox" class="check-step mt-1.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-chef-600 focus:ring-chef-500 cursor-pointer">
-                        <div class="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">${this.escapeHtml(ing)}</div>
-                    </li>
-                `).join('');
-
-                // Steps
+                // Render Instructions with "Done" functionality
                 const stepList = document.getElementById('detailSteps');
                 stepList.innerHTML = recipe.steps.map((step, index) => `
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 bg-chef-100 dark:bg-chef-900 text-chef-600 dark:text-chef-400 font-bold rounded-full flex items-center justify-center text-sm">
-                            ${index + 1}
+                    <label class="flex gap-4 group cursor-pointer select-none">
+                        <input type="checkbox" class="peer sr-only">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-chef-100 dark:bg-chef-900 text-chef-600 dark:text-chef-400 font-bold flex items-center justify-center text-sm transition-all peer-checked:bg-green-500 peer-checked:text-white">
+                            <span class="group-hover:hidden peer-checked:hidden">${index + 1}</span>
+                            <i class="fa-solid fa-check hidden group-hover:block peer-checked:block"></i>
                         </div>
-                        <p class="text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">${this.escapeHtml(step)}</p>
-                    </div>
+                        <p class="text-gray-700 dark:text-gray-300 mt-1 leading-relaxed peer-checked:text-gray-400 peer-checked:line-through transition-colors">
+                            ${this.escapeHtml(step)}
+                        </p>
+                    </label>
                 `).join('');
+
+                // Render Scaled Ingredients
+                this.renderScaledIngredients();
 
                 window.scrollTo(0,0);
             },
 
+            adjustServings(change) {
+                let newS = this.currentServings + change;
+                if (newS < 1) newS = 1;
+                this.currentServings = newS;
+                document.getElementById('detailServingsInput').value = newS;
+                this.renderScaledIngredients();
+            },
+
+            renderScaledIngredients() {
+                if (!this.currentRecipe) return;
+
+                const baseServings = parseInt(this.currentRecipe.servings) || 1;
+                const ratio = this.currentServings / baseServings;
+                
+                const listEl = document.getElementById('detailIngredients');
+                
+                listEl.innerHTML = this.currentRecipe.ingredients.map(ing => {
+                    let displayString = "";
+
+                    if (typeof ing === 'string') {
+                        // Legacy support
+                        displayString = this.escapeHtml(ing);
+                    } else {
+                        // Structured Support
+                        let qtyDisplay = "";
+                        if (ing.qty) {
+                            let val = parseFloat(ing.qty) * ratio;
+                            val = Math.round(val * 100) / 100; 
+                            qtyDisplay = `<span class="font-bold text-chef-600 dark:text-chef-400 mr-1">${val}</span>`;
+                        }
+                        
+                        let unitDisplay = ing.unit ? `<span class="text-gray-500 dark:text-gray-400 mr-1 text-sm">${this.escapeHtml(ing.unit)}</span>` : '';
+                        
+                        displayString = `${qtyDisplay}${unitDisplay}${this.escapeHtml(ing.name)}`;
+                    }
+
+                    // Custom Checkbox UI
+                    return `
+                    <label class="flex items-start gap-3 p-3 hover:bg-orange-50 dark:hover:bg-gray-800 rounded-xl transition-colors cursor-pointer select-none">
+                        <input type="checkbox" class="peer sr-only">
+                        <div class="w-6 h-6 flex-shrink-0 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:bg-chef-500 peer-checked:border-chef-500 flex items-center justify-center transition-all mt-0.5">
+                            <i class="fa-solid fa-check text-white text-xs opacity-0 peer-checked:opacity-100 transform scale-50 peer-checked:scale-100 transition-transform"></i>
+                        </div>
+                        <div class="text-gray-700 dark:text-gray-300 peer-checked:text-gray-400 peer-checked:line-through transition-colors">
+                            ${displayString}
+                        </div>
+                    </label>`;
+                }).join('');
+            },
+
             // Form Logic
-            addIngredientField(value = '') {
+            addIngredientField(qty = '', unit = '', name = '') {
                 const div = document.createElement('div');
-                div.className = 'flex gap-2';
+                div.className = 'grid grid-cols-10 gap-2 ing-row';
                 div.innerHTML = `
-                    <input type="text" value="${this.escapeHtml(value)}" placeholder="e.g. 2 cups Flour" class="ing-input flex-1 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
-                    <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-red-500 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                    <input type="number" step="any" placeholder="1" value="${qty}" class="ing-qty col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
+                    <input type="text" placeholder="cup" value="${this.escapeHtml(unit)}" class="ing-unit col-span-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
+                    <input type="text" placeholder="Flour" value="${this.escapeHtml(name)}" class="ing-name col-span-5 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm">
+                    <button type="button" onclick="this.parentElement.remove()" class="col-span-1 text-gray-400 hover:text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash-can"></i></button>
                 `;
                 document.getElementById('ingredientsList').appendChild(div);
             },
@@ -458,9 +502,18 @@
                 const prep = document.getElementById('recipePrep').value;
                 const servings = document.getElementById('recipeServings').value;
 
-                // Collect ingredients and steps
-                const ingredients = Array.from(document.querySelectorAll('.ing-input'))
-                    .map(input => input.value.trim()).filter(v => v);
+                // Collect structured ingredients
+                const ingredientRows = document.querySelectorAll('.ing-row');
+                const ingredients = [];
+                ingredientRows.forEach(row => {
+                    const qty = row.querySelector('.ing-qty').value.trim();
+                    const unit = row.querySelector('.ing-unit').value.trim();
+                    const itemName = row.querySelector('.ing-name').value.trim();
+                    
+                    if (itemName) {
+                        ingredients.push({ qty, unit, name: itemName });
+                    }
+                });
                 
                 const steps = Array.from(document.querySelectorAll('.step-input'))
                     .map(input => input.value.trim()).filter(v => v);
@@ -470,22 +523,25 @@
                     return;
                 }
 
+                const recipeData = {
+                    name, 
+                    description: desc, 
+                    prepTime: prep, 
+                    servings: servings, 
+                    ingredients, 
+                    steps, 
+                    updatedAt: new Date()
+                };
+
                 if (id) {
-                    // Update
                     const index = this.recipes.findIndex(r => r.id === id);
                     if (index !== -1) {
-                        this.recipes[index] = { ...this.recipes[index], name, description: desc, prepTime: prep, servings, ingredients, steps, updatedAt: new Date() };
+                        this.recipes[index] = { ...this.recipes[index], ...recipeData };
                     }
                 } else {
-                    // Create
                     const newRecipe = {
                         id: Date.now().toString(),
-                        name,
-                        description: desc,
-                        prepTime: prep,
-                        servings,
-                        ingredients,
-                        steps,
+                        ...recipeData,
                         createdAt: new Date()
                     };
                     this.recipes.unshift(newRecipe);
@@ -512,7 +568,6 @@
                 const dataStr = JSON.stringify(this.recipes, null, 2);
                 const blob = new Blob([dataStr], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
-                
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `cookbook_backup_${new Date().toISOString().slice(0,10)}.json`;
@@ -532,45 +587,39 @@
                     try {
                         const imported = JSON.parse(e.target.result);
                         if (Array.isArray(imported)) {
-                            // Merge strategy: Add ones that don't exist by ID, or just Append all?
-                            // Let's replace ID to avoid conflict if it's a fresh import, or keep if backup.
-                            // Simple strategy: Filter out invalid objects, then concat.
-                            const validRecipes = imported.filter(r => r.name && r.ingredients);
-                            
-                            // Check for duplicates based on name to be nice
                             let count = 0;
-                            validRecipes.forEach(newR => {
-                                // Regenerate ID to ensure uniqueness upon import
-                                newR.id = Date.now().toString() + Math.random().toString(36).substr(2, 9); 
-                                this.recipes.unshift(newR);
-                                count++;
+                            imported.forEach(newR => {
+                                if(newR.name) {
+                                    newR.id = Date.now().toString() + Math.random().toString(36).substr(2, 9); 
+                                    this.recipes.unshift(newR);
+                                    count++;
+                                }
                             });
-
                             this.saveToStorage();
                             this.showToast(`${count} recipes imported successfully!`);
-                        } else {
-                            throw new Error('Invalid format');
                         }
                     } catch (err) {
-                        console.error(err);
-                        this.showToast('Failed to import file. Invalid JSON.', 'error');
+                        this.showToast('Failed to import file.', 'error');
                     }
-                    input.value = ''; // Reset file input
+                    input.value = '';
                 };
                 reader.readAsText(file);
             },
 
-            // Rendering
             renderRecipeList() {
                 const grid = document.getElementById('recipeGrid');
                 const empty = document.getElementById('emptyState');
                 const countSpan = document.getElementById('recipeCount');
                 const term = document.getElementById('searchInput').value.toLowerCase();
 
-                const filtered = this.recipes.filter(r => 
-                    r.name.toLowerCase().includes(term) || 
-                    (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(term)))
-                );
+                const filtered = this.recipes.filter(r => {
+                    const nameMatch = r.name.toLowerCase().includes(term);
+                    const ingMatch = r.ingredients && r.ingredients.some(i => {
+                        if (typeof i === 'string') return i.toLowerCase().includes(term);
+                        return i.name.toLowerCase().includes(term);
+                    });
+                    return nameMatch || ingMatch;
+                });
 
                 countSpan.textContent = filtered.length;
 
@@ -605,14 +654,12 @@
                 const toast = document.getElementById('toast');
                 const icon = document.getElementById('toastIcon');
                 const text = document.getElementById('toastMessage');
-
                 text.textContent = msg;
                 if (type === 'error') {
                     icon.className = 'fa-solid fa-circle-exclamation text-red-400';
                 } else {
                     icon.className = 'fa-solid fa-circle-check text-green-400 dark:text-green-500';
                 }
-
                 toast.classList.remove('translate-y-20', 'opacity-0');
                 setTimeout(() => {
                     toast.classList.add('translate-y-20', 'opacity-0');
@@ -621,7 +668,7 @@
 
             escapeHtml(text) {
                 if (!text) return '';
-                return text
+                return String(text)
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;")
@@ -630,7 +677,6 @@
             }
         };
 
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
