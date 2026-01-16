@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Digital Cookbook</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTML2PDF for export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SortableJS for Drag and Drop -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -67,6 +70,29 @@
             color: #f88f70;
             background-color: rgba(248, 143, 112, 0.15);
         }
+        /* Drag Handle Styles */
+        .drag-handle {
+            cursor: grab;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .drag-handle:hover {
+            color: #f06543;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #fff7ed;
+        }
+        .dark .sortable-ghost {
+            background-color: #374151;
+        }
+
         /* Timer Styles */
         .timer-btn {
             display: inline-flex;
@@ -167,6 +193,9 @@
                         </div>
                         <select id="categoryFilter" onchange="app.renderRecipeList()" class="w-full sm:w-48 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:border-chef-500 focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none shadow-sm cursor-pointer appearance-none">
                             <option value="">All Categories</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Snack">Snack</option>
                             <option value="Appetizers">Appetizers</option>
                             <option value="Beverages">Beverages</option>
                             <option value="Breads">Breads</option>
@@ -226,6 +255,9 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
                                 <select id="recipeCategory" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-chef-200 dark:focus:ring-chef-900 outline-none appearance-none">
                                     <option value="">Uncategorized</option>
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Lunch">Lunch</option>
+                                    <option value="Snack">Snack</option>
                                     <option value="Appetizers">Appetizers</option>
                                     <option value="Beverages">Beverages</option>
                                     <option value="Breads">Breads</option>
@@ -249,7 +281,7 @@
                         <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="font-serif font-bold text-lg text-gray-800 dark:text-white">Ingredients</h3>
-                                <!-- 'Add Item' button removed, automatic list -->
+                                <span class="text-xs text-gray-400">Drag to reorder • Empty line to delete</span>
                             </div>
                             <div id="ingredientsList" class="space-y-2"></div>
                         </div>
@@ -257,7 +289,7 @@
                         <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl">
                             <div class="flex justify-between items-center mb-2">
                                 <h3 class="font-serif font-bold text-lg text-gray-800 dark:text-white">Instructions</h3>
-                                <!-- 'Add Step' button removed, automatic list -->
+                                <span class="text-xs text-gray-400">Drag to reorder • Empty line to delete</span>
                             </div>
                             <div id="ingredientToolbar" class="flex flex-wrap gap-2 mb-3 min-h-[28px]"></div>
                             <div id="stepsList" class="space-y-2"></div>
@@ -398,10 +430,31 @@
                     if (e.target && e.target.classList.contains('step-input')) this.lastFocusedStep = e.target;
                 });
                 
+                // Initialize SortableJS
+                this.initSortable();
+
                 // Request notification permission
                 if ('Notification' in window && Notification.permission !== 'granted') {
                     Notification.requestPermission();
                 }
+            },
+
+            initSortable() {
+                // Ingredients Dragging
+                new Sortable(document.getElementById('ingredientsList'), {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: () => this.ensureGhostIngredient()
+                });
+
+                // Steps Dragging
+                new Sortable(document.getElementById('stepsList'), {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: () => this.ensureGhostStep()
+                });
             },
 
             initTheme() {
@@ -466,9 +519,9 @@
                     });
                     recipe.steps.forEach(step => this.addStepField(step));
                     
-                    // Add ghost items at end
-                    this.addIngredientField('', '', '', true);
-                    this.addStepField('', true);
+                    // Add ghost items at end if needed
+                    this.ensureGhostIngredient();
+                    this.ensureGhostStep();
                 } else {
                     title.textContent = 'New Recipe';
                     form.reset();
@@ -868,19 +921,19 @@
                 if (unit && !found) optionsHtml += `<option value="${this.escapeHtml(unit)}" selected>${this.escapeHtml(unit)}</option>`;
 
                 const div = document.createElement('div');
-                div.className = 'grid grid-cols-12 gap-2 ing-row';
+                div.className = 'grid grid-cols-12 gap-2 ing-row items-center';
                 
                 // Ghost logic: Hide delete button, listen for input
-                const deleteClass = isGhost ? 'invisible' : '';
                 const inputAttr = isGhost ? 'oninput="app.onIngredientInput(this)"' : '';
+                const blurAttr = 'onblur="app.cleanUpIngredients(this)"';
                 
                 div.innerHTML = `
-                    <input type="number" step="any" value="${qty}" ${inputAttr} class="ing-qty col-span-3 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" placeholder="Qty">
-                    <select ${inputAttr} class="ing-unit col-span-3 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm appearance-none">
+                    <div class="col-span-1 drag-handle h-full rounded hover:bg-gray-100 dark:hover:bg-gray-800"><i class="fa-solid fa-grip-vertical"></i></div>
+                    <input type="number" step="any" value="${qty}" ${inputAttr} ${blurAttr} class="ing-qty col-span-3 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" placeholder="Qty">
+                    <select ${inputAttr} ${blurAttr} class="ing-unit col-span-3 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm appearance-none">
                         ${optionsHtml}
                     </select>
-                    <input type="text" value="${this.escapeHtml(name)}" ${inputAttr} onkeyup="app.updateIngredientToolbar()" class="ing-name col-span-5 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" placeholder="Ingredient">
-                    <button type="button" onclick="this.parentElement.remove(); app.updateIngredientToolbar();" class="col-span-1 text-gray-400 hover:text-red-500 flex items-center justify-center delete-btn ${deleteClass}"><i class="fa-solid fa-trash-can"></i></button>
+                    <input type="text" value="${this.escapeHtml(name)}" ${inputAttr} ${blurAttr} onkeyup="app.updateIngredientToolbar()" class="ing-name col-span-5 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" placeholder="Ingredient">
                 `;
                 document.getElementById('ingredientsList').appendChild(div);
                 this.updateIngredientToolbar();
@@ -888,26 +941,65 @@
 
             onIngredientInput(el) {
                 const row = el.closest('.ing-row');
-                // Remove oninput handlers from current row inputs so they don't fire again
+                // Remove oninput handlers so they don't fire again
                 row.querySelectorAll('input, select').forEach(i => i.removeAttribute('oninput'));
-                // Show delete button
-                row.querySelector('.delete-btn').classList.remove('invisible');
                 // Add new ghost row
                 this.addIngredientField('', '', '', true);
+            },
+
+            cleanUpIngredients(el) {
+                // If user cleared a row and it's not the ghost row at the end, remove it
+                const row = el.closest('.ing-row');
+                
+                // Check if row is empty
+                const qty = row.querySelector('.ing-qty').value;
+                const unit = row.querySelector('.ing-unit').value;
+                const name = row.querySelector('.ing-name').value;
+                
+                if (!qty && !unit && !name) {
+                    // It is empty. Is it the last one?
+                    if (row.nextElementSibling) {
+                        // Not last, so delete it
+                        row.remove();
+                        this.updateIngredientToolbar();
+                    }
+                }
+                // Ensure we still have a ghost at the bottom (e.g., if we deleted the second to last one)
+                this.ensureGhostIngredient();
+            },
+
+            ensureGhostIngredient() {
+                const list = document.getElementById('ingredientsList');
+                const rows = list.querySelectorAll('.ing-row');
+                const last = rows[rows.length - 1];
+                
+                // If no rows, or last row has data, add a ghost
+                if (!last) {
+                    this.addIngredientField('', '', '', true);
+                    return;
+                }
+
+                const qty = last.querySelector('.ing-qty').value;
+                const unit = last.querySelector('.ing-unit').value;
+                const name = last.querySelector('.ing-name').value;
+
+                if (qty || unit || name) {
+                    this.addIngredientField('', '', '', true);
+                }
             },
 
             addStepField(value = '', isGhost = false) {
                 const div = document.createElement('div');
                 div.className = 'flex gap-2 items-start step-row';
                 
-                const deleteClass = isGhost ? 'invisible' : '';
                 const inputAttr = isGhost ? 'oninput="app.onStepInput(this)"' : '';
+                const blurAttr = 'onblur="app.cleanUpSteps(this)"';
 
                 div.innerHTML = `
-                    <textarea placeholder="e.g. Mix {{0}} with eggs..." ${inputAttr} class="step-input flex-1 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" rows="2">${this.escapeHtml(value)}</textarea>
+                    <div class="drag-handle py-3 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 self-stretch"><i class="fa-solid fa-grip-vertical"></i></div>
+                    <textarea placeholder="e.g. Mix {{0}} with eggs..." ${inputAttr} ${blurAttr} class="step-input flex-1 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded border border-gray-200 dark:border-gray-600 focus:border-chef-500 outline-none text-sm" rows="2">${this.escapeHtml(value)}</textarea>
                     <div class="flex flex-col gap-1">
                         <button type="button" title="Add Timer" onclick="app.insertTimer(this)" class="text-gray-400 hover:text-chef-500 px-2 py-1 rounded bg-gray-50 dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all"><i class="fa-solid fa-clock"></i></button>
-                        <button type="button" title="Remove Step" onclick="this.closest('.step-row').remove()" class="delete-btn ${deleteClass} text-gray-400 hover:text-red-500 px-2 py-1 rounded bg-gray-50 dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `;
                 document.getElementById('stepsList').appendChild(div);
@@ -915,12 +1007,34 @@
 
             onStepInput(el) {
                 const row = el.closest('.step-row');
-                // Remove oninput handler
                 row.querySelector('textarea').removeAttribute('oninput');
-                // Show delete button
-                row.querySelector('.delete-btn').classList.remove('invisible');
-                // Add new ghost step
                 this.addStepField('', true);
+            },
+
+            cleanUpSteps(el) {
+                const row = el.closest('.step-row');
+                const val = row.querySelector('.step-input').value.trim();
+                
+                if (!val && row.nextElementSibling) {
+                    row.remove();
+                }
+                this.ensureGhostStep();
+            },
+
+            ensureGhostStep() {
+                const list = document.getElementById('stepsList');
+                const rows = list.querySelectorAll('.step-row');
+                const last = rows[rows.length - 1];
+
+                if (!last) {
+                    this.addStepField('', true);
+                    return;
+                }
+                
+                const val = last.querySelector('.step-input').value.trim();
+                if (val) {
+                    this.addStepField('', true);
+                }
             },
 
             saveRecipe(e) {
